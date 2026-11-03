@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Kiezkinder Pflege</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..800,100,1&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&display=swap">
+<style>
+/* Layout: one working column; connect card, tabs, grouped lists, edit panel, sticky save bar */
+:root{
+  --bg:#F4EFFC; --surface:#FFFFFF; --ink:#2B1E3F; --muted:#6E6283; --line:#E2D8F2; --accent:#6B3FD4;
+  --sun:#FFD84D; --mint:#9BE7C4; --rose:#FFB3C7; --bad:#B3261E; --chip-ink:#2B1E3F;
+  --f-display:"Fraunces", Georgia, serif; --f-body:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#1A1426; --surface:#251C35; --ink:#F1EAFB; --muted:#B4A8C8; --line:#3A2E50; --accent:#B59BFF;
+  --sun:#E8C23A; --mint:#6CCB9F; --rose:#E88AA4; --bad:#FF8A80; --chip-ink:#1A1426; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:calc(20px + env(safe-area-inset-top,0px));padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
+[hidden]{display:none!important}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1{font-family:var(--f-display);font-variation-settings:"SOFT" 100,"WONK" 1;font-size:clamp(30px,7vw,42px);margin:0;line-height:1.05}
+h2{font-family:var(--f-display);font-variation-settings:"SOFT" 100;font-size:22px;margin:0}
+h3{margin:0;font-size:17px}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.muted{color:var(--muted)}
+.card{background:var(--surface);border:2px solid var(--ink);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:4px 4px 0 var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;min-width:0}
+label small{font-weight:400;color:var(--muted)}
+input,select,textarea{border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:9px 11px;width:100%;min-width:0}
+textarea{min-height:64px;resize:vertical}
+.btn{border:2px solid var(--ink);background:var(--surface);border-radius:999px;padding:8px 16px;font-weight:700;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.btn.small{padding:4px 11px;font-size:14px;border-width:1.5px}
+.btn.danger{border-color:var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{border:2px solid var(--ink);background:transparent;border-radius:14px;padding:8px 16px;font-weight:700;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--surface);box-shadow:3px 3px 0 var(--ink)}
+.group{display:flex;flex-direction:column;gap:8px}
+.ghead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding-top:6px}
+.item{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:12px}
+.item .when{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.item .what{min-width:0}
+.item .what b{overflow-wrap:anywhere}
+.item .meta{font-size:13.5px;color:var(--muted)}
+.item .acts{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}
+.item.ended{opacity:.55}
+.item.dirty{border-color:var(--accent)}
+.hours{display:grid;grid-template-columns:44px 1fr 1fr;gap:6px 8px;align-items:center}
+.msg{border-radius:14px;padding:10px 14px;font-size:14.5px}
+.msg.ok{background:var(--mint);color:var(--chip-ink)}
+.msg.err{border:2px solid var(--bad);color:var(--bad);background:var(--surface)}
+.msg.info{border:1.5px dashed var(--muted);color:var(--muted)}
+.savebar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:2px solid var(--ink);
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:5}
+.savebar .inner{max-width:760px;margin:0 auto;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+details summary{cursor:pointer;font-weight:700}
+ol{margin:6px 0 0;padding-left:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="row" style="justify-content:space-between">
+    <div><h1>Kiezkinder Pflege</h1><p class="muted" style="margin:4px 0 0">Wochenpläne, Einzeltermine und Orte eintragen. Nur für dich, die Eltern sehen diese Seite nicht.</p></div>
+    <a href="./" class="btn small" style="text-decoration:none">Zur Seite ↗</a>
+  </header>
+
+  <section class="card" id="connect">
+    <h2>Mit GitHub verbinden</h2>
+    <div class="grid">
+      <label>GitHub-Nutzername <input id="owner" autocomplete="off"></label>
+      <label>Repository <input id="repo" autocomplete="off" placeholder="kiezkinder"></label>
+    </div>
+    <label>Zugangsschlüssel (Token) <small>Wird nur in diesem Browser gespeichert.</small><input id="token" type="password" autocomplete="off" placeholder="github_pat_…"></label>
+    <details>
+      <summary>So bekommst du den Zugangsschlüssel</summary>
+      <ol>
+        <li>Öffne auf GitHub: Profilbild → Settings → Developer settings → Personal access tokens → Fine-grained tokens.</li>
+        <li>Klick „Generate new token“, Name z. B. „Kiezkinder“, Ablauf 1 Jahr.</li>
+        <li>Bei „Repository access“: „Only select repositories“ und dein Kiezkinder-Repo wählen.</li>
+        <li>Bei „Permissions“: „Contents“ auf „Read and write“, „Actions“ auf „Read and write“.</li>
+        <li>„Generate token“ klicken und den Schlüssel hier einfügen.</li>
+      </ol>
+    </details>
+    <div class="row"><button class="btn primary" id="btn-connect" type="button">Verbinden und laden</button><span id="connect-status" class="muted"></span></div>
+  </section>
+
+  <div id="main" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="plans" aria-selected="true" type="button">Wochenpläne</button>
+      <button class="tab" role="tab" data-tab="events" aria-selected="false" type="button">Einzeltermine</button>
+      <button class="tab" role="tab" data-tab="places" aria-selected="false" type="button">Orte</button>
+      <button class="tab" role="tab" data-tab="fetch" aria-selected="false" type="button">Online-Kalender</button>
+      <button class="tab" role="tab" data-tab="suggest" aria-selected="false" type="button">Vorschläge <span id="sg-count"></span></button>
+    </div>
+
+    <section id="tab-plans" class="group">
+      <div class="msg info">Ein Wochenplan-Eintrag wiederholt sich jede Woche am gleichen Tag, solange er gültig ist. Kommt ein neues Monatsprogramm, beende die alten Einträge mit „Alle beenden am …“ und trag die neuen ein.</div>
+      <div class="row"><button class="btn primary" type="button" id="add-plan">+ Neuer Wochenplan-Eintrag</button></div>
+      <div id="plans"></div>
+    </section>
+
+    <section id="tab-events" class="group" hidden>
+      <div class="msg info">Für einmalige Termine, zum Beispiel ein Fest oder ein Theaterstück aus einem PDF-Programm.</div>
+      <div class="row"><button class="btn primary" type="button" id="add-event">+ Neuer Einzeltermin</button></div>
+      <div id="events"></div>
+    </section>
+
+    <section id="tab-places" class="group" hidden>
+      <div class="msg info">Orte mit Öffnungszeiten erscheinen auf der Seite unter „Einfach hingehen“. Orte mit dem Hinweis „automatisch“ werden aus Online-Kalendern gefüllt.</div>
+      <div class="row"><button class="btn primary" type="button" id="add-place">+ Neuer Ort</button></div>
+      <div id="places"></div>
+    </section>
+
+    <section id="tab-fetch" class="group" hidden>
+      <div class="card">
+        <h2>Online-Kalender</h2>
+        <p style="margin:0">Bibliotheken und KREATIVHAUS werden am 1. und 15. jedes Monats automatisch abgeholt. Mit dem Knopf holst du sie sofort ab. Das dauert ca. 3–5 Minuten.</p>
+        <div class="row"><button class="btn" type="button" id="btn-fetch">Jetzt abholen</button><span id="fetch-status" class="muted"></span></div>
+        <div id="fetch-info" class="muted" style="font-size:14px"></div>
+      </div>
+    </section>
+
+    <section id="tab-suggest" class="group" hidden>
+      <div class="msg info">Termine, die Eltern über „Termin vorschlagen“ eingereicht haben. Nichts davon ist auf der Seite, bis du es übernimmst.</div>
+      <div class="row">
+        <button class="btn" type="button" id="sg-load">Neu laden</button>
+        <button class="btn small danger" type="button" id="sg-dropall" hidden>Alle verwerfen</button>
+        <span id="sg-status" class="muted"></span>
+      </div>
+      <div id="sg-list" class="group"></div>
+      <details class="card">
+        <summary>Einstellungen für Vorschläge</summary>
+        <label>Link zum Google-Formular <small>Wird auf der Seite als Knopf „Termin vorschlagen“ gezeigt. Leer lassen, um den Knopf auszublenden.</small>
+          <input id="sg-form" type="url" placeholder="https://forms.gle/…" autocomplete="off"></label>
+        <label>Link zur Antworten-Tabelle als CSV <small>Nur in diesem Browser gespeichert, nie auf GitHub. So bleibt die Tabelle privat.</small>
+          <input id="sg-csv" type="url" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?output=csv" autocomplete="off"></label>
+        <div class="row"><button class="btn primary" type="button" id="sg-save">Einstellungen übernehmen</button><span id="sg-save-status" class="muted"></span></div>
+      </details>
+    </section>
+
+    <section class="card" id="editor" hidden>
+      <h2 id="ed-title">Eintrag</h2>
+      <form id="ed-form" class="group" autocomplete="off"></form>
+      <div class="row">
+        <button class="btn primary" type="button" id="ed-ok">Übernehmen</button>
+        <button class="btn" type="button" id="ed-cancel">Abbrechen</button>
+      </div>
+      <div id="ed-error" class="msg err" hidden></div>
+    </section>
+  </div>
+</div>
+
+<div class="savebar" id="savebar" hidden>
+  <div class="inner">
+    <span id="save-text">Keine Änderungen</span>
+    <button class="btn primary" type="button" id="btn-save" disabled>Veröffentlichen</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const WD = ['','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+  const WDS = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+  const AGES = [['', 'offen'],[0,'0 Monate'],[6,'6 Monate'],[12,'1 Jahr'],[18,'1,5 Jahre'],[24,'2 Jahre'],[36,'3 Jahre'],[48,'4 Jahre'],[60,'5 Jahre'],[72,'6 Jahre'],[84,'7 Jahre']];
+  const SIGNUP = ['', 'ohne Anmeldung', 'Anmeldung nötig', 'Voranmeldung evtl. nötig'];
+  const COST = ['', 'kostenlos', 'kostenpflichtig', 'evtl. kostenpflichtig'];
+  const PATH = 'data/manual.json';
+
+  let cfg = {}, data = null, sha = null, dirty = 0, editing = null;
+  try{ cfg = JSON.parse(localStorage.getItem('kiezkinder-admin')||'{}'); }catch(e){}
+  if (!cfg.owner && location.hostname.endsWith('.github.io')){
+    cfg.owner = location.hostname.split('.')[0];
+    const seg = location.pathname.split('/').filter(Boolean)[0];
+    if (seg && !seg.endsWith('.html')) cfg.repo = seg;
+  }
+  $('owner').value = cfg.owner||''; $('repo').value = cfg.repo||''; $('token').value = cfg.token||'';
+
+  const today = new Date().toISOString().slice(0,10);
+  const el = (tag, attrs, ...kids) => { const n=document.createElement(tag); for(const k in (attrs||{})){ if(k==='class') n.className=attrs[k]; else if(k.startsWith('on')) n.addEventListener(k.slice(2),attrs[k]); else n.setAttribute(k,attrs[k]); } for(const c of kids.flat()){ if(c==null||c===false||c==='') continue; n.append(c.nodeType?c:document.createTextNode(c)); } return n; };
+  const ageText = (lo,hi) => { const f=v=>(AGES.find(a=>a[0]===v)||[0,v+' Mon.'])[1]; if(lo==null&&hi==null) return 'alle Alter'; if(hi==null) return 'ab '+f(lo); if(lo==null||lo===0) return 'bis '+f(hi); return f(lo)+' bis '+f(hi); };
+  const deDate = s => s ? s.split('-').reverse().join('.') : '';
+  const wins = v => !v ? [] : (Array.isArray(v[0]) ? v : [v]);
+
+  // ---- GitHub API ----
+  async function gh(path, opts={}){
+    const r = await fetch('https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+path, Object.assign({}, opts, {
+      headers: Object.assign({'Accept':'application/vnd.github+json','Authorization':'Bearer '+cfg.token,'X-GitHub-Api-Version':'2022-11-28'}, opts.headers||{})
+    }));
+    if (!r.ok){ let m=''; try{ m=(await r.json()).message; }catch(e){} const err = new Error(m||('Fehler '+r.status)); err.status=r.status; throw err; }
+    return r.status===204 ? null : r.json();
+  }
+  const b64decode = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g,'')), c=>c.charCodeAt(0)));
+  const b64encode = s => { const bytes = new TextEncoder().encode(s); let bin=''; bytes.forEach(b=>bin+=String.fromCharCode(b)); return btoa(bin); };
+
+  async function load(){
+    const f = await gh('/contents/'+PATH);
+    sha = f.sha; data = JSON.parse(b64decode(f.content));
+    data.places ||= {}; data.plans ||= []; data.events ||= []; data.settings ||= {}; data.handled ||= [];
+    $('sg-form').value = data.settings.suggestUrl || ''; $('sg-csv').value = cfg.csvUrl || '';
+    dirty = 0; renderAll();
+    if (cfg.csvUrl) loadSuggestions();
+  }
+  $('btn-connect').addEventListener('click', async ()=>{
+    cfg = Object.assign(cfg, { owner:$('owner').value.trim(), repo:$('repo').value.trim(), token:$('token').value.trim() });
+    if (!cfg.owner || !cfg.repo || !cfg.token){ $('connect-status').textContent = 'Bitte alle drei Felder ausfüllen.'; return; }
+    try{ localStorage.setItem('kiezkinder-admin', JSON.stringify(cfg)); }catch(e){}
+    $('connect-status').textContent = 'Lade …';
+    try{ await load(); $('connect-status').textContent = 'Verbunden.'; $('main').hidden=false; $('savebar').hidden=false; $('connect').querySelector('details').open=false; }
+    catch(e){ $('connect-status').textContent = e.status===401 ? 'Der Zugangsschlüssel stimmt nicht oder ist abgelaufen.' : e.status===404 ? 'Repository oder Datei nicht gefunden. Nutzername und Repo prüfen.' : 'Fehler: '+e.message; }
+  });
+  if (cfg.owner && cfg.repo && cfg.token) $('btn-connect').click();
+
+  $('btn-save').addEventListener('click', async ()=>{
+    $('btn-save').disabled = true; $('save-text').textContent = 'Speichere …';
+    try{
+      const body = { message:'Pflege: '+dirty+' Änderung(en)', content: b64encode(JSON.stringify(data, null, 1)+'\n'), sha };
+      const r = await gh('/contents/'+PATH, {method:'PUT', body: JSON.stringify(body)});
+      sha = r.content.sha; dirty = 0; renderAll();
+      $('save-text').textContent = 'Veröffentlicht. Auf der Seite in ca. 5 Minuten sichtbar.';
+    }catch(e){
+      $('btn-save').disabled = false;
+      $('save-text').textContent = e.status===409 ? 'Die Datei wurde inzwischen woanders geändert. Seite neu laden, Änderungen sind sonst weg.' : 'Speichern fehlgeschlagen: '+e.message;
+    }
+  });
+  function markDirty(){ dirty++; updateSave(); }
+  function updateSave(){ $('btn-save').disabled = !dirty; if (dirty) $('save-text').textContent = dirty+(dirty===1?' Änderung':' Änderungen')+' noch nicht veröffentlicht'; }
+  window.addEventListener('beforeunload', e=>{ if (dirty){ e.preventDefault(); e.returnValue=''; } });
+
+  // ---- tabs ----
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected', x===t));
+    ['plans','events','places','fetch','suggest'].forEach(n=>$('tab-'+n).hidden = n!==t.dataset.tab);
+    closeEditor();
+    if (t.dataset.tab==='fetch') loadFetchInfo();
+    if (t.dataset.tab==='suggest') loadSuggestions();
+  }));
+
+  // ---- lists ----
+  function confirmButton(label, onYes){
+    const b = el('button',{type:'button',class:'btn small danger'},label);
+    let armed=false;
+    b.addEventListener('click',()=>{ if(!armed){ armed=true; b.textContent='Wirklich?'; setTimeout(()=>{armed=false;b.textContent=label;},4000); } else onYes(); });
+    return b;
+  }
+  function placeOptions(){ return Object.entries(data.places).map(([id,p])=>[id,p.name]); }
+
+  function renderPlans(){
+    const box = $('plans'); box.replaceChildren();
+    const ids = [...new Set(data.plans.map(p=>p.place))];
+    if (!ids.length) box.append(el('p',{class:'muted'},'Noch keine Wochenpläne.'));
+    for (const id of ids){
+      const list = data.plans.filter(p=>p.place===id).sort((a,b)=>(a.weekday-b.weekday)||a.start.localeCompare(b.start));
+      const endIn = el('input',{type:'date','aria-label':'Enddatum',style:'width:auto'});
+      box.append(el('div',{class:'ghead'}, el('h2',null,(data.places[id]||{}).name||id),
+        el('div',{class:'row'}, endIn, el('button',{type:'button',class:'btn small',onclick:()=>{
+          if(!endIn.value) { endIn.focus(); return; }
+          list.forEach(p=>{ if(!p.validTo || p.validTo>endIn.value) p.validTo=endIn.value; }); markDirty(); renderPlans(); }},'Alle beenden am'))));
+      for (const p of list){
+        const ended = p.validTo && p.validTo < today;
+        box.append(el('div',{class:'item'+(ended?' ended':'')},
+          el('span',{class:'when'}, WD[p.weekday].slice(0,2)+' '+p.start+(p.end?'–'+p.end:'')),
+          el('div',{class:'what'}, el('b',null,p.title), el('div',{class:'meta'}, ageText(p.ageMin,p.ageMax)
+            +(p.signup?' · '+p.signup:'')+(p.cost?' · '+p.cost:'')
+            +' · gültig '+(p.validFrom?'ab '+deDate(p.validFrom):'')+(p.validTo?' bis '+deDate(p.validTo):' ohne Ende')
+            +(p.skip&&p.skip.length?' · fällt aus: '+p.skip.map(deDate).join(', '):''))),
+          el('div',{class:'acts'},
+            el('button',{type:'button',class:'btn small',onclick:()=>openEditor('plan',p)},'Bearbeiten'),
+            el('button',{type:'button',class:'btn small',onclick:()=>{ const c=Object.assign({},p,{id:p.place+'-'+Date.now()}); openEditor('plan',c,true); }},'Kopieren'),
+            confirmButton('Löschen',()=>{ data.plans.splice(data.plans.indexOf(p),1); markDirty(); renderPlans(); }))));
+      }
+    }
+  }
+  function renderEvents(){
+    const box = $('events'); box.replaceChildren();
+    const list = data.events.slice().sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+    if (!list.length) box.append(el('p',{class:'muted'},'Noch keine Einzeltermine.'));
+    for (const e of list){
+      box.append(el('div',{class:'item'+(e.date<today?' ended':'')},
+        el('span',{class:'when'}, deDate(e.date)+' '+(e.start||'')),
+        el('div',{class:'what'}, el('b',null,e.title), el('div',{class:'meta'}, ((data.places[e.place]||{}).name||e.place)+' · '+ageText(e.ageMin,e.ageMax)+(e.highlight?' · Highlight':''))),
+        el('div',{class:'acts'},
+          el('button',{type:'button',class:'btn small',onclick:()=>openEditor('event',e)},'Bearbeiten'),
+          confirmButton('Löschen',()=>{ data.events.splice(data.events.indexOf(e),1); markDirty(); renderEvents(); }))));
+    }
+  }
+  function renderPlaces(){
+    const box = $('places'); box.replaceChildren();
+    for (const [id,p] of Object.entries(data.places)){
+      const hrs = p.hours ? Object.keys(p.hours).sort().map(k=>WDS[k]+' '+wins(p.hours[k]).map(h=>h.join('–')).join(' + ')).join(', ') : '';
+      const used = data.plans.some(x=>x.place===id) || data.events.some(x=>x.place===id);
+      box.append(el('div',{class:'item'},
+        el('span',{class:'when'}, p.type||'Ort'),
+        el('div',{class:'what'}, el('b',null,p.name), el('div',{class:'meta'}, p.address+(p.auto?' · automatisch':'')+(hrs?' · offen '+hrs:'')+(p.lat?'':' · ohne Kartenpunkt'))),
+        el('div',{class:'acts'},
+          el('button',{type:'button',class:'btn small',onclick:()=>openEditor('place',Object.assign({id},p))},'Bearbeiten'),
+          p.auto||used ? null : confirmButton('Löschen',()=>{ delete data.places[id]; markDirty(); renderPlaces(); }))));
+    }
+  }
+  function renderAll(){ renderPlans(); renderEvents(); renderPlaces(); updateSave(); }
+
+  // ---- editor ----
+  const sel = (name, opts, val) => el('select',{name}, opts.map(([v,t])=>{ const o=el('option',{value:v},t); if(String(v)===String(val??'')) o.selected=true; return o; }));
+  const inp = (name, type, val, extra={}) => el('input', Object.assign({name, type, value: val??''}, extra));
+  const field = (label, control, hint) => el('label',null,label, hint? el('small',null,hint):null, control);
+
+  function openEditor(kind, obj, isNew){
+    editing = {kind, obj, isNew: isNew || !obj};
+    const o = obj || {};
+    const f = $('ed-form'); f.replaceChildren(); $('ed-error').hidden = true;
+    $('ed-title').textContent = {plan:'Wochenplan-Eintrag',event:'Einzeltermin',place:'Ort'}[kind];
+    if (kind==='plan' || kind==='event'){
+      f.append(el('div',{class:'grid'},
+        field('Ort', sel('place', placeOptions(), o.place)),
+        kind==='plan' ? field('Wochentag', sel('weekday', WD.slice(1).map((d,i)=>[i+1,d]), o.weekday||1)) : field('Datum', inp('date','date',o.date)),
+        field('Beginn', inp('start','time',o.start)), field('Ende', inp('end','time',o.end))));
+      f.append(field('Titel', inp('title','text',o.title,{placeholder:'z. B. Offene Krabbelgruppe'})));
+      f.append(el('div',{class:'grid'},
+        field('Alter von', sel('ageMin', AGES, o.ageMin)), field('Alter bis', sel('ageMax', AGES, o.ageMax)),
+        field('Anmeldung', sel('signup', SIGNUP.map(s=>[s,s||'keine Angabe']), o.signup)),
+        field('Kosten', sel('cost', COST.map(s=>[s,s||'keine Angabe']), o.cost))));
+      f.append(field('Hinweis', el('textarea',{name:'note'},o.note||''), 'Kurz, in eigenen Worten. Optional.'));
+      if (kind==='plan') f.append(el('div',{class:'grid'},
+        field('Gültig ab', inp('validFrom','date',o.validFrom||today)), field('Gültig bis', inp('validTo','date',o.validTo), 'Leer lassen, wenn offen.'),
+        field('Fällt aus am', inp('skip','text',(o.skip||[]).map(deDate).join(', '),{placeholder:'24.12.2026, 31.12.2026'}), 'Mehrere Daten mit Komma.')));
+      if (kind==='event') f.append(el('label',{style:'flex-direction:row;align-items:center;gap:8px'}, inp('highlight','checkbox','on',o.highlight?{checked:''}:{} ), 'Als Highlight zeigen'));
+      if (kind==='event') f.append(field('Link', inp('url','url',o.url,{placeholder:'https://…'}), 'Optional. Sonst wird die Seite des Orts verlinkt.'));
+    } else {
+      f.append(el('div',{class:'grid'}, field('Name', inp('name','text',o.name)), field('Art', inp('type','text',o.type,{placeholder:'Familienzentrum, Bibliothek, Spielort'}))));
+      f.append(field('Adresse', inp('address','text',o.address)));
+      f.append(field('Website', inp('url','url',o.url)));
+      f.append(field('Kartenpunkt', inp('coords','text',o.lat?o.lat+', '+o.lng:'',{placeholder:'52.5309, 13.4212'}), 'In Google Maps auf den Ort rechtsklicken und die Zahlen anklicken, dann hier einfügen.'));
+      f.append(el('h3',null,'Öffnungszeiten für „Einfach hingehen“'), el('p',{class:'muted',style:'margin:0;font-size:14px'},'Nur ausfüllen, wenn man ohne Termin vorbeikommen kann.'));
+      f.append(el('p',{class:'muted',style:'margin:0;font-size:14px'},'Zweite Zeile pro Tag nur, wenn nachmittags noch einmal geöffnet ist.'));
+      const hg = el('div',{class:'hours'});
+      [1,2,3,4,5,6,0].forEach(w=>{ const ws = wins((o.hours||{})[String(w)]); const h1 = ws[0]||['',''], h2 = ws[1]||['',''];
+        hg.append(el('b',null,WDS[w]), inp('h'+w+'a','time',h1[0],{'aria-label':WDS[w]+' von'}), inp('h'+w+'b','time',h1[1],{'aria-label':WDS[w]+' bis'}),
+                  el('span',null,''), inp('h'+w+'c','time',h2[0],{'aria-label':WDS[w]+' zweites Fenster von'}), inp('h'+w+'d','time',h2[1],{'aria-label':WDS[w]+' zweites Fenster bis'})); });
+      f.append(hg);
+      f.append(el('div',{class:'grid'}, field('Alter (Text)', inp('ageLabel','text',o.ageLabel,{placeholder:'0–6 Jahre'})), field('Hinweis', inp('note','text',o.note))));
+      f.append(field('Zusatz zu den Öffnungszeiten', inp('hoursNote','text',o.hoursNote,{placeholder:'z. B. Garten täglich 9–18 Uhr'}), 'Optional. Erscheint klein unter dem Wochenraster.'));
+    }
+    $('editor').hidden = false; $('editor').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function closeEditor(cancelled=true){ if (cancelled && editing && editing.onCancel) editing.onCancel(); $('editor').hidden = true; editing = null; }
+  $('ed-cancel').addEventListener('click', ()=>closeEditor(true));
+  $('add-plan').addEventListener('click', ()=>openEditor('plan', null));
+  $('add-event').addEventListener('click', ()=>openEditor('event', null));
+  $('add-place').addEventListener('click', ()=>openEditor('place', null));
+
+  function parseDates(s){ return s.split(/[,;\s]+/).filter(Boolean).map(d=>{ const m=d.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/); return m? m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0') : null; }); }
+  const num = v => v==='' ? null : Number(v);
+
+  $('ed-ok').addEventListener('click', ()=>{
+    const fd = Object.fromEntries(new FormData($('ed-form')).entries());
+    const err = m => { $('ed-error').textContent = m; $('ed-error').hidden = false; };
+    const {kind, obj} = editing;
+    if (kind==='plan' || kind==='event'){
+      if (!fd.title.trim()) return err('Bitte einen Titel eintragen.');
+      if (!fd.start) return err('Bitte eine Anfangszeit eintragen.');
+      if (fd.end && fd.end <= fd.start) return err('Das Ende liegt vor dem Beginn.');
+      const lo = num(fd.ageMin), hi = num(fd.ageMax);
+      if (lo!=null && hi!=null && hi <= lo) return err('„Alter bis“ muss größer sein als „Alter von“.');
+      const base = { place:fd.place, start:fd.start, end:fd.end||'', title:fd.title.trim(), ageMin:lo, ageMax:hi, note:fd.note.trim(), signup:fd.signup, cost:fd.cost };
+      if (kind==='plan'){
+        const skip = parseDates(fd.skip||'');
+        if (skip.includes(null)) return err('„Fällt aus am“ bitte als TT.MM.JJJJ, mehrere mit Komma.');
+        if (fd.validTo && fd.validFrom && fd.validTo < fd.validFrom) return err('„Gültig bis“ liegt vor „Gültig ab“.');
+        Object.assign(base, { weekday:Number(fd.weekday), validFrom:fd.validFrom, validTo:fd.validTo||'', skip });
+        if (obj && !editing.isNew) Object.assign(obj, base); else data.plans.push(Object.assign({id: fd.place+'-'+Date.now()}, base));
+      } else {
+        if (!fd.date) return err('Bitte ein Datum eintragen.');
+        Object.assign(base, { date:fd.date, highlight: fd.highlight==='on', url: fd.url||'' });
+        if (obj && !editing.isNew) Object.assign(obj, base); else data.events.push(base);
+      }
+    } else {
+      if (!fd.name.trim() || !fd.address.trim()) return err('Name und Adresse sind Pflicht.');
+      let lat=null,lng=null;
+      if (fd.coords.trim()){ const m = fd.coords.replace(/\s/g,'').match(/^(-?\d+\.\d+),(-?\d+\.\d+)$/); if(!m) return err('Kartenpunkt bitte als „52.5309, 13.4212“.'); lat=+m[1]; lng=+m[2]; }
+      const hours = {};
+      for (const w of [0,1,2,3,4,5,6]){
+        const ws = [];
+        for (const [x,y] of [['a','b'],['c','d']]){ const a=fd['h'+w+x], b=fd['h'+w+y];
+          if(a||b){ if(!a||!b||b<=a) return err('Öffnungszeit am '+WDS[w]+' unvollständig oder Ende vor Beginn.'); ws.push([a,b]); } }
+        if (ws.length===2 && ws[1][0] < ws[0][1]) return err('Die zweite Öffnungszeit am '+WDS[w]+' muss nach der ersten beginnen.');
+        if (ws.length) hours[String(w)] = ws.length===1 ? ws[0] : ws;
+      }
+      const id = (obj && obj.id) || fd.name.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,24) || ('ort-'+Date.now());
+      const prev = data.places[id] || {};
+      const p = Object.assign({}, prev, { name:fd.name.trim(), type:fd.type.trim(), address:fd.address.trim(), url:fd.url.trim(), lat, lng, ageLabel:fd.ageLabel.trim(), note:fd.note.trim(), hoursNote:fd.hoursNote.trim() });
+      if (!p.hoursNote) delete p.hoursNote;
+      if (Object.keys(hours).length) p.hours = hours; else delete p.hours;
+      if (!lat) { delete p.lat; delete p.lng; }
+      data.places[id] = p;
+    }
+    const done = editing.onDone;
+    if (done) done();
+    markDirty(); closeEditor(false); renderAll();
+  });
+
+  // ---- suggestions from the Google Form ----
+  // The answer sheet is read as published CSV. Its link lives only in this browser (cfg.csvUrl), never in the public repo.
+  // Handled rows are remembered by their timestamp in data.handled, so a suggestion never shows up twice.
+  let suggestions = [];
+  function parseCSV(text){
+    const rows=[]; let row=[], cell='', q=false;
+    for (let i=0;i<text.length;i++){ const c=text[i];
+      if (q){ if (c==='"'){ if (text[i+1]==='"'){ cell+='"'; i++; } else q=false; } else cell+=c; }
+      else if (c==='"') q=true;
+      else if (c===','){ row.push(cell); cell=''; }
+      else if (c==='\n' || c==='\r'){ if (c==='\r' && text[i+1]==='\n') i++; row.push(cell); rows.push(row); row=[]; cell=''; }
+      else cell+=c; }
+    if (cell || row.length){ row.push(cell); rows.push(row); }
+    return rows.filter(r => r.some(x => x.trim()));
+  }
+  const COLS = [['ts',/zeitstempel|timestamp/],['title',/^was/],['date',/datum|date/],['start',/beginn|start/],['end',/ende|end/],
+    ['place',/^wo\b|^wo\?|ort$/],['address',/adresse/],['age',/alter|age/],['cost',/kosten/],['signup',/anmeldung/],['url',/link/],['weekly',/woche|regelm/],['note',/hinweis/]];
+  function toISO(d){ d=(d||'').trim(); let m;
+    if ((m=d.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})/))) return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+    if ((m=d.match(/^(\d{4})-(\d{2})-(\d{2})/))) return m[0];
+    if ((m=d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/))) return m[3]+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');
+    return ''; }
+  const toTime = t => { const m=(t||'').match(/(\d{1,2}):(\d{2})/); return m ? m[1].padStart(2,'0')+':'+m[2] : ''; };
+  function ageRange(txt){
+    if (!txt || /alle/i.test(txt)) return [null,null];
+    const parts = [[/baby/i,0,12],[/kleinkind/i,12,36],[/kita/i,36,72]].filter(([re])=>re.test(txt));
+    return parts.length ? [Math.min(...parts.map(p=>p[1])), Math.max(...parts.map(p=>p[2]))] : [null,null];
+  }
+  async function loadSuggestions(){
+    if (!data) return;
+    if (!cfg.csvUrl){ $('sg-status').textContent = 'Noch keine Antworten-Tabelle verbunden. Siehe „Einstellungen für Vorschläge“ unten.'; renderSuggestions(); return; }
+    $('sg-status').textContent = 'Lade …';
+    try{
+      const r = await fetch(cfg.csvUrl + (cfg.csvUrl.includes('?')?'&':'?') + 't=' + Date.now());
+      if (!r.ok) throw new Error('Fehler '+r.status);
+      const rows = parseCSV(await r.text());
+      const head = (rows.shift()||[]).map(h=>h.toLowerCase().trim());
+      const idx = {}; COLS.forEach(([k,re]) => { const i = head.findIndex(h => re.test(h)); if (i>=0 && !(k in idx)) idx[k]=i; });
+      suggestions = rows.map(r => { const o={}; for (const k in idx) o[k]=(r[idx[k]]||'').trim(); return o; }).filter(o => o.ts && o.title);
+      $('sg-status').textContent = '';
+    }catch(e){
+      suggestions = [];
+      $('sg-status').textContent = 'Vorschläge nicht lesbar ('+e.message+'). Ist die Tabelle als CSV im Web veröffentlicht?';
+    }
+    renderSuggestions();
+  }
+  function renderSuggestions(){
+    const open = suggestions.filter(s => !data.handled.includes(s.ts));
+    $('sg-count').textContent = open.length ? '('+open.length+')' : '';
+    $('sg-dropall').hidden = open.length < 2;
+    const box = $('sg-list'); box.replaceChildren();
+    if (cfg.csvUrl && !open.length) box.append(el('p',{class:'muted'},'Keine neuen Vorschläge.'));
+    for (const s of open){
+      const weekly = /^ja/i.test(s.weekly||'');
+      box.append(el('div',{class:'item'},
+        el('span',{class:'when'}, (deDate(toISO(s.date))||s.date)+' '+toTime(s.start)),
+        el('div',{class:'what'}, el('b',null,s.title),
+          el('div',{class:'meta'}, [s.place, s.address, s.age, s.cost, s.signup, weekly?'jede Woche':''].filter(Boolean).join(' · ')),
+          s.note? el('div',{class:'meta'},'„'+s.note+'“') : null,
+          s.url? el('a',{href:s.url,target:'_blank',rel:'noopener noreferrer',style:'font-size:13px'},'Link prüfen ↗') : null),
+        el('div',{class:'acts'},
+          el('button',{type:'button',class:'btn small',onclick:()=>acceptSuggestion(s, weekly)},'Übernehmen …'),
+          el('button',{type:'button',class:'btn small danger',onclick:()=>{ data.handled.push(s.ts); markDirty(); renderSuggestions(); }},'Verwerfen'))));
+    }
+  }
+  function acceptSuggestion(s, weekly){
+    // Find the place by name, or create it without a map point (you can add one later under „Orte“)
+    const name = (s.place||'').trim() || 'Unbekannter Ort';
+    let pid = Object.keys(data.places).find(id => data.places[id].name.toLowerCase() === name.toLowerCase()), created = false;
+    if (!pid){ created = true;
+      pid = name.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,24) || ('ort-'+Date.now());
+      if (data.places[pid]) pid += '-' + Date.now().toString(36);
+      data.places[pid] = { name, type:'Vorschlag', address:(s.address||'').trim() || 'Adresse fehlt', url:s.url||'' };
+    }
+    const [lo,hi] = ageRange(s.age);
+    const iso = toISO(s.date);
+    const base = { place:pid, start:toTime(s.start), end:toTime(s.end), title:s.title, ageMin:lo, ageMax:hi, note:s.note||'',
+      signup: SIGNUP.includes(s.signup)? s.signup : '', cost: /kostenlos/i.test(s.cost)?'kostenlos': /pflichtig/i.test(s.cost)?'kostenpflichtig':'' };
+    const obj = weekly
+      ? Object.assign(base, { weekday: iso ? (parse(iso).getUTCDay()||7) : 1, validFrom: iso||today, validTo:'', skip:[] })
+      : Object.assign(base, { date: iso, url: s.url||'', highlight:false });
+    openEditor(weekly ? 'plan' : 'event', obj, true);
+    editing.onDone = () => { data.handled.push(s.ts); setTimeout(renderSuggestions); };
+    editing.onCancel = () => { if (created) delete data.places[pid]; };
+  }
+  const parse = s => { const [y,m,d]=s.split('-').map(Number); return new Date(Date.UTC(y,m-1,d)); };
+  $('sg-load').addEventListener('click', loadSuggestions);
+  $('sg-dropall').addEventListener('click', ()=>{ const b=$('sg-dropall');
+    if (b.dataset.armed){ suggestions.filter(s=>!data.handled.includes(s.ts)).forEach(s=>data.handled.push(s.ts)); markDirty(); renderSuggestions(); delete b.dataset.armed; b.textContent='Alle verwerfen'; }
+    else { b.dataset.armed='1'; b.textContent='Wirklich alle verwerfen?'; setTimeout(()=>{ delete b.dataset.armed; b.textContent='Alle verwerfen'; },4000); } });
+  $('sg-save').addEventListener('click', ()=>{
+    const form = $('sg-form').value.trim(), csv = $('sg-csv').value.trim();
+    if (form && !/^https:\/\/(forms\.gle|docs\.google\.com)\//.test(form)){ $('sg-save-status').textContent = 'Der Formular-Link sollte mit https://forms.gle/ oder https://docs.google.com/ beginnen.'; return; }
+    if (csv && !/output=csv/.test(csv)){ $('sg-save-status').textContent = 'Der Tabellen-Link muss als CSV veröffentlicht sein (enthält „output=csv“).'; return; }
+    if ((data.settings.suggestUrl||'') !== form){ data.settings.suggestUrl = form; markDirty(); }
+    cfg.csvUrl = csv; try{ localStorage.setItem('kiezkinder-admin', JSON.stringify(cfg)); }catch(e){}
+    $('sg-save-status').textContent = 'Übernommen.' + (dirty ? ' Den Formular-Link unten veröffentlichen.' : '');
+    loadSuggestions();
+  });
+
+  // ---- fetch online calendars ----
+  async function loadFetchInfo(){
+    try{
+      const runs = await gh('/actions/workflows/update.yml/runs?per_page=1');
+      const r = runs.workflow_runs[0];
+      $('fetch-info').textContent = r ? 'Letzter Abruf: '+new Date(r.created_at).toLocaleString('de-DE')+' · '+({success:'erfolgreich',failure:'fehlgeschlagen',cancelled:'abgebrochen'}[r.conclusion]||'läuft gerade') : 'Noch kein Abruf gelaufen.';
+    }catch(e){ $('fetch-info').textContent = 'Status nicht lesbar ('+e.message+').'; }
+  }
+  $('btn-fetch').addEventListener('click', async ()=>{
+    $('fetch-status').textContent = 'Starte …';
+    try{ await gh('/actions/workflows/update.yml/dispatches',{method:'POST',body:JSON.stringify({ref:'main'})}); $('fetch-status').textContent = 'Gestartet. In ca. 5 Minuten sind die neuen Termine auf der Seite.'; setTimeout(loadFetchInfo, 5000); }
+    catch(e){ $('fetch-status').textContent = e.status===403 ? 'Dem Zugangsschlüssel fehlt die Berechtigung „Actions: Read and write“.' : 'Start fehlgeschlagen: '+e.message; }
+  });
+})();
+</script>
+</body>
+</html>

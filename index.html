@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Kiezkinder Kalender</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..800,100,1&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&display=swap">
+<style>
+/* Layout: one narrow column like a fridge note: week switch + age chips, highlights, open places, then list or hand-drawn kiez map */
+:root{
+  --bg:#F4EFFC; --surface:#FFFFFF; --ink:#2B1E3F; --muted:#6E6283; --line:#E2D8F2; --accent:#6B3FD4;
+  --sun:#FFD84D; --mint:#9BE7C4; --rose:#FFB3C7; --sky:#A9D4FF; --chip-ink:#2B1E3F;
+  --map-land:#EAE1F8; --map-street:#FFFFFF; --map-park:#CDEFD9; --map-water:#C9DDF7;
+  --f-display:"Fraunces", Georgia, "Times New Roman", serif;
+  --f-body:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:18px; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#1A1426; --surface:#251C35; --ink:#F1EAFB; --muted:#B4A8C8; --line:#3A2E50; --accent:#B59BFF;
+  --sun:#E8C23A; --mint:#6CCB9F; --rose:#E88AA4; --sky:#7FB4EA; --chip-ink:#1A1426;
+  --map-land:#2C2240; --map-street:#46395E; --map-park:#2B4A3C; --map-water:#27405F; color-scheme:dark}}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:calc(20px + env(safe-area-inset-top,0px));padding-bottom:calc(48px + env(safe-area-inset-bottom,0px))}
+[hidden]{display:none!important}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+a{color:var(--accent)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+header{position:relative;display:flex;flex-direction:column;gap:6px;padding-top:8px}
+.kicker{padding-right:70px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--f-display);font-variation-settings:"SOFT" 100,"WONK" 1;font-weight:700;font-size:clamp(34px,8vw,54px);line-height:1.02;margin:0;text-wrap:balance;padding-right:70px}
+h1 em{font-style:italic;color:var(--accent)}
+.squiggle{display:block;width:160px;height:12px;margin-top:2px}
+.squiggle path{stroke:var(--sun);stroke-width:5;fill:none;stroke-linecap:round}
+.sub{color:var(--muted);max-width:52ch;margin:4px 0 0}
+.doodle{position:absolute;right:0;top:0;width:86px;height:86px;pointer-events:none}
+@media (max-width:480px){.doodle{width:60px;height:60px}}
+
+.controls{display:flex;flex-direction:column;gap:12px}
+.seg{display:inline-flex;background:var(--surface);border:2px solid var(--ink);border-radius:999px;padding:4px;gap:4px;align-self:flex-start;box-shadow:3px 3px 0 var(--ink)}
+.seg button{border:0;background:transparent;border-radius:999px;padding:8px 16px;font-weight:600;cursor:pointer;font-size:15px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--ink);background:var(--surface);border-radius:999px;padding:6px 13px;font-weight:600;font-size:14px;cursor:pointer;transition:transform .15s}
+.chip:hover{transform:translateY(-1px) rotate(-1deg)}
+.chip[aria-pressed="true"]{color:var(--chip-ink)}
+.chip[data-age="all"][aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.chip[data-age="baby"][aria-pressed="true"]{background:var(--mint)}
+.chip[data-age="klein"][aria-pressed="true"]{background:var(--sun)}
+.chip[data-age="kita"][aria-pressed="true"]{background:var(--rose)}
+
+.sectionhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h2{font-family:var(--f-display);font-variation-settings:"SOFT" 100;font-weight:650;font-size:26px;margin:0}
+.count{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+.hl-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,78%);gap:12px;overflow-x:auto;padding:4px 6px 10px 2px;scroll-snap-type:x mandatory}
+@media (min-width:640px){.hl-row{grid-auto-columns:calc(50% - 6px)}}
+.hl{scroll-snap-align:start;background:var(--sun);color:var(--chip-ink);border:2px solid var(--ink);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:6px;box-shadow:4px 4px 0 var(--ink);min-width:0;text-decoration:none}
+.hl:nth-child(3n+2){background:var(--rose)}
+.hl:nth-child(3n+3){background:var(--mint)}
+.hl .when{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.hl h3{font-family:var(--f-display);font-variation-settings:"SOFT" 100,"WONK" 1;font-size:21px;line-height:1.15;margin:0;text-wrap:balance}
+.hl .where{font-size:14px}
+.empty{color:var(--muted);background:var(--surface);border:2px dashed var(--line);border-radius:var(--r);padding:16px}
+
+.tabs{display:flex;gap:8px}
+.tab{border:2px solid var(--ink);background:transparent;border-radius:14px;padding:8px 16px;font-weight:700;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--surface);box-shadow:3px 3px 0 var(--ink)}
+
+.day{display:flex;flex-direction:column;gap:10px}
+.dayhead{position:sticky;top:0;z-index:2;background:var(--bg);padding:calc(8px + env(safe-area-inset-top,0px)) 0 4px;display:flex;align-items:baseline;gap:10px}
+.dayhead .dname{font-family:var(--f-display);font-weight:700;font-size:22px}
+.dayhead .ddate{color:var(--muted);font-variant-numeric:tabular-nums}
+.dayhead .today{background:var(--accent);color:var(--bg);font-size:12px;font-weight:700;border-radius:999px;padding:2px 8px;text-transform:uppercase;letter-spacing:.06em}
+.ev{display:grid;grid-template-columns:62px 1fr;gap:12px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:14px}
+.ev .time{font-weight:700;font-variant-numeric:tabular-nums;font-size:15px;line-height:1.2}
+.ev .time small{display:block;font-weight:500;color:var(--muted)}
+.ev .body{min-width:0;display:flex;flex-direction:column;gap:5px}
+.ev h3{margin:0;font-size:17px;line-height:1.25;font-weight:700;overflow-wrap:anywhere}
+.ev .note{color:var(--muted);font-size:14.5px;margin:0}
+.ev .place{font-size:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.ev .place .venue{color:var(--muted)}
+.linkbtn{border:0;background:none;padding:0;color:var(--accent);font-weight:600;cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:12.5px;font-weight:700;border-radius:999px;padding:2px 9px;color:var(--chip-ink);background:var(--line)}
+.tag.age-baby{background:var(--mint)} .tag.age-klein{background:var(--sun)} .tag.age-kita{background:var(--rose)} .tag.age-gross{background:var(--sky)} .tag.age-all{background:var(--line);color:var(--ink)}
+.tag.plain{background:transparent;border:1.5px solid var(--line);color:var(--muted)}
+.tag.warn{background:transparent;border:1.5px dashed var(--muted);color:var(--muted)}
+.ev .src{font-size:13px}
+.ev.star{border:2px solid var(--ink);box-shadow:3px 3px 0 var(--sun)}
+.filternote{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--surface);border:2px solid var(--accent);border-radius:14px;padding:10px 14px;font-size:14px}
+.filternote button{border:0;background:var(--accent);color:var(--bg);border-radius:999px;padding:4px 12px;font-weight:700;cursor:pointer}
+
+.openlist{display:flex;flex-direction:column;gap:12px}
+.op{background:var(--surface);border:2px solid var(--ink);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:4px 4px 0 var(--mint)}
+.op-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.op h3{font-family:var(--f-display);font-variation-settings:"SOFT" 100,"WONK" 1;font-size:22px;margin:0;line-height:1.15}
+.op .addr{font-size:14px;color:var(--muted)}
+.status{font-weight:700;font-size:14px;border-radius:999px;padding:5px 12px;border:2px solid var(--ink);white-space:nowrap}
+.status.on{background:var(--mint);color:var(--chip-ink)}
+.status.off{background:transparent;color:var(--muted);border-style:dashed;border-color:var(--muted)}
+.hours{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.hd{border-radius:12px;padding:6px 2px;text-align:center;background:var(--bg);font-size:12px;font-variant-numeric:tabular-nums;line-height:1.25;color:var(--muted);white-space:pre-line}
+.hd b{display:block;font-size:13px;color:var(--ink)}
+.hd.has{background:var(--line);color:var(--ink)}
+.hd.now{outline:2.5px solid var(--accent);outline-offset:-2.5px}
+.openline{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;background:var(--surface);border:1.5px dashed var(--muted);border-radius:var(--r);padding:10px 14px}
+.openline .lab{font-weight:700}
+
+.mapcard{background:var(--surface);border:2px solid var(--ink);border-radius:24px;padding:12px;box-shadow:4px 4px 0 var(--ink)}
+.mapcard svg{width:100%;height:auto;display:block;border-radius:16px;max-height:70vh}
+.map-land{fill:var(--map-land)} .map-park{fill:var(--map-park)}
+.map-water{stroke:var(--map-water);stroke-width:12;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.map-street{stroke:var(--map-street);stroke-width:6;fill:none;stroke-linecap:round}
+.map-label{fill:var(--muted);font:600 10px var(--f-body);letter-spacing:.04em}
+.pin{cursor:pointer}
+.pin .dot{stroke:var(--ink);stroke-width:2.5}
+.pin text{font:800 12px var(--f-body);fill:var(--chip-ink);pointer-events:none}
+.pin:hover .dot,.pin:focus .dot{stroke-width:4}
+.legend{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.legend button{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;border:1.5px solid var(--line);background:var(--bg);border-radius:14px;padding:10px 12px;cursor:pointer}
+.legend .n{width:26px;height:26px;border-radius:50%;border:2px solid var(--ink);display:grid;place-items:center;font-weight:800;font-size:12px;color:var(--chip-ink)}
+.legend .n.sq{border-radius:8px}
+.legend .lname{font-weight:700;display:block}
+.legend .laddr{font-size:13px;color:var(--muted)}
+.legend .lcount{font-size:13px;font-weight:700;color:var(--muted)}
+
+.loading{color:var(--muted);padding:16px;border:2px dashed var(--line);border-radius:var(--r)}
+.suggest{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--surface);border:2px solid var(--ink);border-radius:22px;padding:16px;box-shadow:4px 4px 0 var(--rose);color:var(--ink);text-decoration:none;font-size:15px}
+.suggest-btn{background:var(--accent);color:var(--bg);border-radius:999px;padding:8px 16px;font-weight:700;white-space:nowrap}
+.suggest:hover .suggest-btn{transform:translateY(-1px)}
+footer{border-top:2px dashed var(--line);padding-top:16px;color:var(--muted);font-size:14px;display:flex;flex-direction:column;gap:8px}
+footer p{margin:0}
+footer strong{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="doodle" viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="22" fill="var(--sun)" stroke="var(--ink)" stroke-width="3"/>
+      <g stroke="var(--ink)" stroke-width="3" stroke-linecap="round">
+        <line x1="50" y1="8" x2="50" y2="20"/><line x1="50" y1="80" x2="50" y2="92"/>
+        <line x1="8" y1="50" x2="20" y2="50"/><line x1="80" y1="50" x2="92" y2="50"/>
+        <line x1="20" y1="20" x2="28" y2="28"/><line x1="72" y1="72" x2="80" y2="80"/>
+        <line x1="80" y1="20" x2="72" y2="28"/><line x1="20" y1="80" x2="28" y2="72"/>
+      </g>
+      <circle cx="43" cy="47" r="2.5" fill="var(--ink)"/><circle cx="57" cy="47" r="2.5" fill="var(--ink)"/>
+      <path d="M42 56 Q50 63 58 56" stroke="var(--ink)" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </svg>
+    <span class="kicker">Prenzlauer Berg, Mitte &amp; Friedrichshain · 0 bis 6 Jahre</span>
+    <h1>Was ist los im <em>Kiez</em>?</h1>
+    <svg class="squiggle" viewBox="0 0 160 12" aria-hidden="true"><path d="M3 7 Q 17 1 31 7 T 59 7 T 87 7 T 115 7 T 143 7 T 157 6"/></svg>
+    <p class="sub">Kostenlose und günstige Termine aus Bibliotheken, Familienzentren und Kursen, gesammelt an einem Ort. <span id="stand"></span></p>
+  </header>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Woche wählen">
+      <button id="wk-this" type="button" aria-pressed="true">Diese Woche</button>
+      <button id="wk-next" type="button" aria-pressed="false">Nächste Woche</button>
+    </div>
+    <div class="chips" role="group" aria-label="Alter filtern">
+      <button class="chip" type="button" data-age="all" aria-pressed="true">Alle Alter</button>
+      <button class="chip" type="button" data-age="baby" aria-pressed="false">Baby 0–1</button>
+      <button class="chip" type="button" data-age="klein" aria-pressed="false">Kleinkind 1–3</button>
+      <button class="chip" type="button" data-age="kita" aria-pressed="false">Kita 3–6</button>
+    </div>
+  </div>
+
+  <div id="loading" class="loading">Termine werden geladen …</div>
+
+  <div id="app" hidden style="display:flex;flex-direction:column;gap:22px">
+    <section aria-labelledby="hl-title">
+      <div class="sectionhead"><h2 id="hl-title">Highlights</h2><span class="count" id="hl-count"></span></div>
+      <div class="hl-row" id="hl"></div>
+    </section>
+
+    <section aria-labelledby="open-title" style="display:flex;flex-direction:column;gap:12px" id="open-section">
+      <div class="sectionhead"><h2 id="open-title">Einfach hingehen</h2><span class="count">ohne Termin, zu den Öffnungszeiten</span></div>
+      <div id="openplaces" class="openlist"></div>
+    </section>
+
+    <section aria-labelledby="all-title" style="display:flex;flex-direction:column;gap:14px">
+      <div class="sectionhead">
+        <h2 id="all-title">Alle Termine</h2>
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" id="tab-list" aria-selected="true" type="button">Liste</button>
+          <button class="tab" role="tab" id="tab-map" aria-selected="false" type="button">Karte</button>
+        </div>
+      </div>
+      <div id="filternote" hidden class="filternote"><span id="filternote-text"></span><button type="button" id="clearplace">Alle Orte zeigen</button></div>
+      <div id="view-list" style="display:flex;flex-direction:column;gap:18px"></div>
+      <div id="view-map" hidden>
+        <div class="mapcard">
+          <svg id="map" viewBox="0 0 360 552" role="img" aria-label="Kiezkarte mit den Orten"></svg>
+          <div class="legend" id="legend"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <a id="suggest" class="suggest" hidden target="_blank" rel="noopener">
+    <span><b>Etwas entdeckt, das hier fehlt?</b><br>Schlag einen Termin vor. Er erscheint, sobald er geprüft ist.</span>
+    <span class="suggest-btn">Termin vorschlagen ↗</span>
+  </a>
+
+  <footer>
+    <p><strong>Ohne Gewähr.</strong> Termine ändern sich manchmal kurzfristig. Schau vor dem Losgehen kurz auf die Seite der Einrichtung, der Link steht bei jedem Termin.</p>
+    <p id="sources"></p>
+    <p>Die Kartenpositionen sind ungefähr.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  // Data lives in the repo: data/manual.json (by hand, via admin.html) and data/events.json (fetched by the GitHub Action).
+  // On GitHub Pages we read straight from raw.githubusercontent.com so changes show up within ~5 minutes without a rebuild.
+  function dataBase(){
+    const h = location.hostname;
+    if (h.endsWith('.github.io')){
+      const owner = h.split('.')[0];
+      const seg = location.pathname.split('/').filter(Boolean)[0];
+      const repo = seg && !seg.endsWith('.html') ? seg : owner + '.github.io';
+      return 'https://raw.githubusercontent.com/' + owner + '/' + repo + '/main/data/';
+    }
+    return 'data/';
+  }
+  async function loadJSON(name){
+    const bases = [dataBase(), 'data/'];
+    for (const b of bases){
+      try{ const r = await fetch(b + name + '?t=' + Math.floor(Date.now()/60000)); if (r.ok) return await r.json(); }catch(e){}
+    }
+    throw new Error(name + ' nicht gefunden');
+  }
+
+  const DAYS = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+  const WD = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+  const WD_ORDER = [1,2,3,4,5,6,0];
+  const MON = ['Jan.','Feb.','März','Apr.','Mai','Juni','Juli','Aug.','Sep.','Okt.','Nov.','Dez.'];
+  const AGE = { all:null, baby:[0,12], klein:[12,36], kita:[36,72] };
+  const pinColors = ['var(--sun)','var(--rose)','var(--sky)','var(--accent)'];
+
+  const state = { week:'this', age:'all', view:'list', place:null };
+  try{ const s = JSON.parse(localStorage.getItem('kiezkinder')||'{}'); if (s.age && s.age in AGE) state.age = s.age; }catch(e){}
+
+  function berlinToday(){
+    try{ return new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()); }
+    catch(e){ return new Date().toISOString().slice(0,10); }
+  }
+  function berlinNow(){
+    try{ return new Intl.DateTimeFormat('de-DE',{timeZone:'Europe/Berlin',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()); }
+    catch(e){ const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+  }
+  const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(Date.UTC(y,m-1,d)); };
+  const fmt = d => d.toISOString().slice(0,10);
+  const addDays = (d,n) => new Date(d.getTime()+n*864e5);
+  const today = berlinToday();
+  const td = parse(today);
+  const monday = addDays(td, -((td.getUTCDay()+6)%7));
+  const weeks = { this:[today, fmt(addDays(monday,6))], next:[fmt(addDays(monday,7)), fmt(addDays(monday,13))] };
+
+  let P = {}, EVENTS = [], META = {};
+
+  function ageLabel(lo, hi, e){
+    if (lo==null && hi==null) return e && e.source==='auto' ? 'Alter siehe Link' : 'Familien';
+    const y = m => (m % 12 === 0) ? (m/12)+'' : (m/12).toFixed(1).replace('.',',');
+    if (hi==null) return lo < 24 && lo % 12 ? 'ab '+lo+' Monaten' : 'ab '+y(lo)+' Jahren';
+    if (!lo) return hi <= 24 ? 'bis '+hi+' Monate' : 'bis '+y(hi)+' Jahre';
+    if (hi <= 24) return lo+'–'+hi+' Monate';
+    return y(lo)+'–'+y(hi)+' Jahre';
+  }
+  function expandPlans(plans, from, to){
+    const out = [];
+    for (let d = parse(from); fmt(d) <= to; d = addDays(d,1)){
+      const ds = fmt(d), wd = d.getUTCDay() || 7;
+      for (const p of plans){
+        if (Number(p.weekday) !== wd) continue;
+        if (p.validFrom && ds < p.validFrom) continue;
+        if (p.validTo && ds > p.validTo) continue;
+        if ((p.skip||[]).includes(ds)) continue;
+        out.push(Object.assign({}, p, { date: ds, fromPlan: true }));
+      }
+    }
+    return out;
+  }
+
+  function ageMatch(e){
+    const r = AGE[state.age]; if (!r) return true;
+    if (e.ageMin==null && e.ageMax==null) return true;
+    const lo = e.ageMin ?? 0, hi = e.ageMax ?? 999;
+    return lo < r[1] && hi > r[0];
+  }
+  function ageClass(e){
+    if (e.ageMin==null && e.ageMax==null) return 'age-all';
+    const lo = e.ageMin ?? 0, hi = e.ageMax ?? 999;
+    if (lo===0 && hi>=72) return 'age-all';
+    if (hi<=12) return 'age-baby';
+    if (hi<=36 && lo<36) return 'age-klein';
+    if (lo>=72) return 'age-gross';
+    return 'age-kita';
+  }
+  function inWeek(e){ const [a,b] = weeks[state.week]; return e.date>=a && e.date<=b; }
+  function visible(){ return EVENTS.filter(e => inWeek(e) && ageMatch(e) && (!state.place || e.place===state.place))
+    .sort((a,b)=> (a.date+a.start).localeCompare(b.date+b.start)); }
+
+  function el(tag, attrs, ...kids){
+    const n = document.createElement(tag);
+    for (const k in (attrs||{})){ if (k==='class') n.className = attrs[k]; else if (k.startsWith('on')) n.addEventListener(k.slice(2), attrs[k]); else n.setAttribute(k, attrs[k]); }
+    for (const c of kids.flat()){ if (c==null||c===false||c==='') continue; n.append(c.nodeType? c : document.createTextNode(c)); }
+    return n;
+  }
+  function dayLabel(ds){ const d = parse(ds); return { name: DAYS[d.getUTCDay()], date: d.getUTCDate()+'. '+MON[d.getUTCMonth()] }; }
+  const placeName = id => (P[id] && P[id].name) || id;
+  function pickPlace(id){ state.place = id; state.view='list'; render(); const t=document.getElementById('all-title'); window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-10,behavior:'smooth'}); }
+
+  function renderHighlights(){
+    const box = document.getElementById('hl'); box.replaceChildren();
+    const list = EVENTS.filter(e => e.highlight && inWeek(e) && ageMatch(e)).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+    document.getElementById('hl-count').textContent = list.length ? list.length + (list.length===1?' Tipp':' Tipps') : '';
+    if (!list.length){ box.append(el('div',{class:'empty'},'Für diese Auswahl gibt es keine besonderen Highlights. Unten stehen alle regelmäßigen Termine.')); return; }
+    for (const e of list){
+      const d = dayLabel(e.date);
+      box.append(el('a',{class:'hl',href:e.url || (P[e.place]||{}).url || '#',target:'_blank',rel:'noopener'},
+        el('span',{class:'when'}, d.name+', '+d.date+(e.start?' · '+e.start:'')),
+        el('h3',null,e.title),
+        el('span',{class:'where'}, placeName(e.place)),
+        el('div',{class:'tags'}, el('span',{class:'tag plain'}, e.ageLabel || ageLabel(e.ageMin,e.ageMax,e)), e.cost==='kostenlos'? el('span',{class:'tag plain'},'kostenlos'):null)
+      ));
+    }
+  }
+
+  const openIds = () => Object.keys(P).filter(id => P[id].hours && Object.keys(P[id].hours).length);
+  const isClosedDay = (id, ds) => (P[id].closed||[]).some(([a,b]) => ds >= a && ds <= (b||a));
+  // A weekday holds either one window ["10:00","13:00"] or several [["10:00","13:00"],["15:00","18:00"]]
+  const windows = v => !v ? [] : (Array.isArray(v[0]) ? v : [v]);
+  const dayWindows = (p, w) => windows((p.hours||{})[String(w)]);
+  const openOn = (id, ds) => { if (isClosedDay(id, ds)) return null; const ws = dayWindows(P[id], parse(ds).getUTCDay()); return ws.length ? ws : null; };
+  const windowsText = (ws, short) => ws.map(h => short ? h[0].replace(':00','')+'–'+h[1].replace(':00','') : h[0]+'–'+h[1]).join(short ? '\n' : ' und ');
+  function currentWindow(id){ const now = berlinNow(); return (openOn(id, today)||[]).find(h => now >= h[0] && now < h[1]) || null; }
+  function nextOpening(id){
+    const now = berlinNow();
+    for (let i=0;i<8;i++){ const ds = fmt(addDays(td,i));
+      for (const h of (openOn(id, ds)||[])){ if (i===0 && now >= h[0]) continue; return {i, ds, h}; } }
+    return null;
+  }
+  function weekDates(){ const [a,b] = weeks[state.week]; const out=[]; for(let d=parse(a); fmt(d)<=b; d=addDays(d,1)) out.push(fmt(d)); return out; }
+
+  function renderOpen(){
+    const box = document.getElementById('openplaces'); box.replaceChildren();
+    const ids = openIds().filter(id => ageMatch(P[id]));
+    document.getElementById('open-section').hidden = !openIds().length;
+    if (!ids.length){ box.append(el('div',{class:'empty'},'Für diese Altersgruppe ist noch kein offener Ort eingetragen.')); return; }
+    const todayWd = td.getUTCDay();
+    const openNow = id => !!currentWindow(id);
+    ids.sort((a,b) => (openNow(b) - openNow(a)) || (P[a].type||'').localeCompare(P[b].type||'') || P[a].name.localeCompare(P[b].name));
+    for (const id of ids){
+      const p = P[id], cur = currentWindow(id);
+      let status;
+      if (isClosedDay(id, today)) status = el('span',{class:'status off'},'Heute geschlossen');
+      else if (cur) status = el('span',{class:'status on'},'Jetzt offen bis '+cur[1]);
+      else { const n = nextOpening(id);
+        status = el('span',{class:'status off'}, !n ? 'Öffnungszeiten prüfen' : n.i===0 ? 'Heute ab '+n.h[0] : n.i===1 ? 'Morgen ab '+n.h[0] : 'Wieder '+WD[parse(n.ds).getUTCDay()]+' ab '+n.h[0]); }
+      const grid = el('div',{class:'hours','aria-label':'Öffnungszeiten'},
+        WD_ORDER.map(w => { const ws = dayWindows(p, w);
+          return el('div',{class:'hd'+(ws.length?' has':'')+(w===todayWd?' now':'')}, el('b',null,WD[w]), ws.length? windowsText(ws, true) : 'zu'); }));
+      box.append(el('article',{class:'op'},
+        el('div',{class:'op-top'}, el('div',null, el('h3',null,p.name), el('div',{class:'addr'},p.address)), status),
+        p.note? el('p',{style:'margin:0;color:var(--muted);font-size:14.5px'},p.note):null,
+        grid,
+        p.hoursNote? el('p',{style:'margin:0;color:var(--muted);font-size:13px'},p.hoursNote):null,
+        el('div',{class:'tags'}, p.type? el('span',{class:'tag plain'},p.type):null, p.ageLabel? el('span',{class:'tag age-all'},p.ageLabel):null, el('span',{class:'tag plain'},'ohne Anmeldung'), el('span',{class:'tag plain'},'kostenlos')),
+        el('a',{href:p.url,target:'_blank',rel:'noopener',style:'font-size:13px'},'Zur Seite der Einrichtung ↗')));
+    }
+  }
+
+  function renderList(){
+    const box = document.getElementById('view-list'); box.replaceChildren();
+    const byDay = {};
+    for (const e of visible()) (byDay[e.date] ||= []).push(e);
+    const openToday = ds => openIds().filter(id => (!state.place || state.place===id) && ageMatch(P[id]) && openOn(id, ds));
+    const days = weekDates().filter(ds => byDay[ds] || openToday(ds).length);
+    if (META.until && weeks[state.week][1] > META.until){
+      const u = parse(META.until);
+      box.append(el('div',{class:'empty'},'Die Online-Kalender sind bis '+u.getUTCDate()+'. '+MON[u.getUTCMonth()]+' geladen. Spätere Termine kommen beim nächsten Abruf dazu.'));
+    }
+    if (!days.length){ box.append(el('div',{class:'empty'},'Keine Termine für diese Auswahl. Probier eine andere Altersgruppe oder die andere Woche.')); return; }
+    for (const ds of days){
+      const d = dayLabel(ds);
+      const day = el('div',{class:'day'},
+        el('div',{class:'dayhead'}, el('span',{class:'dname'},d.name), el('span',{class:'ddate'},d.date), ds===today? el('span',{class:'today'},'heute'):null));
+      const op = openToday(ds);
+      if (op.length) day.append(el('div',{class:'openline'}, el('span',{class:'lab'},'Einfach hingehen:'),
+        op.map((id,i) => el('span',null, el('button',{type:'button',class:'linkbtn',onclick:()=>pickPlace(id)}, P[id].name), ' '+windowsText(openOn(id, ds))+(i<op.length-1?' ·':'')))));
+      for (const e of (byDay[ds]||[])){
+        const pl = P[e.place] || {};
+        day.append(el('article',{class:'ev'+(e.highlight?' star':'')},
+          el('div',{class:'time'}, e.start || 'ganztags', e.end? el('small',null,'bis '+e.end):null),
+          el('div',{class:'body'},
+            el('h3',null,e.title),
+            el('div',{class:'place'}, el('button',{type:'button',class:'linkbtn',onclick:()=>pickPlace(e.place)}, placeName(e.place)),
+              e.venue && pl.name && !pl.name.toLowerCase().includes(e.venue.toLowerCase()) ? el('span',{class:'venue'},'· '+e.venue) : null),
+            e.note? el('p',{class:'note'},e.note):null,
+            el('div',{class:'tags'},
+              el('span',{class:'tag '+ageClass(e)}, e.ageLabel || ageLabel(e.ageMin, e.ageMax, e)),
+              e.cost? el('span',{class:'tag plain'}, e.cost):null,
+              e.signup? el('span',{class:'tag plain'}, e.signup):null,
+              e.check? el('span',{class:'tag warn'},'nicht in den Ferien'):null
+            ),
+            el('a',{class:'src',href:e.url || pl.eventsUrl || pl.url || '#',target:'_blank',rel:'noopener'}, e.via ? 'Mehr bei '+e.via+' ↗' : 'Zur Seite der Einrichtung ↗')
+          )
+        ));
+      }
+      box.append(day);
+    }
+  }
+
+  // Hand-drawn map: equirectangular projection over Prenzlauer Berg, Mitte and Friedrichshain
+  const BOX = {w:360,h:552, lng0:13.398, lng1:13.448, lat0:52.506, lat1:52.552};
+  const X = lng => (lng-BOX.lng0)/(BOX.lng1-BOX.lng0)*BOX.w;
+  const Y = lat => BOX.h - (lat-BOX.lat0)/(BOX.lat1-BOX.lat0)*BOX.h;
+  const line = pts => 'M'+pts.map(p=>X(p[1]).toFixed(1)+' '+Y(p[0]).toFixed(1)).join(' L');
+  const NS='http://www.w3.org/2000/svg';
+  function s(tag, attrs, text){ const n=document.createElementNS(NS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); if(text) n.textContent=text; return n; }
+  // Places that only have opening hours (no events at all) count their open days; everything else counts events
+  const pureOpen = id => openIds().includes(id) && !EVENTS.some(e => e.place === id);
+  function countByPlace(){ const c={}; EVENTS.filter(e=>inWeek(e)&&ageMatch(e)).forEach(e=>c[e.place]=(c[e.place]||0)+1);
+    for (const id of openIds()) if (pureOpen(id)) c[id] = ageMatch(P[id]) ? weekDates().filter(ds=>openOn(id,ds)).length : 0; return c; }
+
+  function renderMap(){
+    const svg = document.getElementById('map'); svg.replaceChildren();
+    svg.append(s('rect',{x:0,y:0,width:BOX.w,height:BOX.h,class:'map-land',rx:16}));
+    svg.append(s('path',{class:'map-park',d:line([[52.5455,13.4015],[52.5455,13.4060],[52.5390,13.4060],[52.5390,13.4030]])+' Z'}));
+    svg.append(s('path',{class:'map-park',d:line([[52.5300,13.4255],[52.5292,13.4420],[52.5255,13.4420],[52.5258,13.4265]])+' Z'}));
+    svg.append(s('path',{class:'map-water',d:line([[52.5205,13.3980],[52.5170,13.4035],[52.5128,13.4100],[52.5098,13.4190],[52.5072,13.4290],[52.5050,13.4400]])}));
+    [
+      [[52.5291,13.4105],[52.5520,13.4135]],                // Schönhauser Allee
+      [[52.5247,13.4155],[52.5520,13.4270]],                // Prenzlauer Allee
+      [[52.5262,13.4248],[52.5450,13.4430]],                // Greifswalder Str.
+      [[52.5410,13.4000],[52.5398,13.4250],[52.5390,13.4460]], // Eberswalder / Danziger Str.
+      [[52.5292,13.3990],[52.5272,13.4150],[52.5252,13.4300],[52.5235,13.4460]], // Torstr. / Mollstr.
+      [[52.5220,13.4132],[52.5175,13.4460]],                // Karl-Marx-Allee
+      [[52.5219,13.4132],[52.5150,13.4110],[52.5110,13.4080]] // Grunerstr. Richtung Fischerinsel
+    ].forEach(p => svg.append(s('path',{class:'map-street',d:line(p)})));
+    [['Schönhauser Allee',52.5350,13.4090,-86],['Prenzlauer Allee',52.5370,13.4185,-70],['Greifswalder Str.',52.5330,13.4300,-48],
+     ['Danziger Str.',52.5408,13.4180,-1],['Karl-Marx-Allee',52.5208,13.4220,-8],['Alexanderplatz',52.5232,13.4040,0],
+     ['Spree',52.5108,13.4140,-28],['Mauerpark',52.5462,13.4000,0],['Volkspark',52.5276,13.4300,0]]
+      .forEach(([t,la,ln,rot])=>{ const x=X(ln),y=Y(la); svg.append(s('text',{class:'map-label',x,y,transform:`rotate(${rot} ${x} ${y})`},t)); });
+
+    const counts = countByPlace();
+    const inBox = p => p.lat > BOX.lat0 && p.lat < BOX.lat1 && p.lng > BOX.lng0 && p.lng < BOX.lng1;
+    // Hand-entered places always show; places found by the calendar import only when they have something this week
+    const ids = Object.keys(P).filter(id => P[id].lat && P[id].lng && inBox(P[id]) && (!P[id].auto || counts[id]))
+      .sort((a,b) => (counts[b]||0) - (counts[a]||0));
+    ids.forEach((id,i)=>{
+      const p = P[id], x=X(p.lng), y=Y(p.lat), r = id===state.place? 17:14, isOpen = pureOpen(id);
+      const g = s('g',{class:'pin',tabindex:0,role:'button','aria-label':p.name+', '+(counts[id]||0)+(isOpen?' offene Tage':' Termine')});
+      if (isOpen) g.append(s('rect',{class:'dot',x:x-r,y:y-r,width:2*r,height:2*r,rx:7,fill:'var(--mint)'}));
+      else g.append(s('circle',{class:'dot',cx:x,cy:y,r,fill:pinColors[i%pinColors.length]}));
+      g.append(s('text',{x,y:y+4,'text-anchor':'middle'}, String(counts[id]||0)));
+      const pick = ()=>pickPlace(id);
+      g.addEventListener('click',pick); g.addEventListener('keydown',ev=>{ if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();pick();} });
+      svg.append(g);
+    });
+    const lg = document.getElementById('legend'); lg.replaceChildren();
+    ids.forEach((id,i)=>{
+      const p = P[id], isOpen = pureOpen(id), hrs = WD_ORDER.filter(w=>(p.hours||{})[String(w)]).map(w=>WD[w]).join(', ');
+      lg.append(el('button',{type:'button',onclick:()=>pickPlace(id)},
+        el('span',{class:'n'+(isOpen?' sq':''),style:'background:'+(isOpen?'var(--mint)':pinColors[i%pinColors.length])}, String(counts[id]||0)),
+        el('span',null, el('span',{class:'lname'},p.name), el('span',{class:'laddr'}, (hrs? 'Offen '+hrs+' · ' : '')+p.address)),
+        el('span',{class:'lcount'},'zeigen →')));
+    });
+  }
+
+  function render(){
+    document.getElementById('wk-this').setAttribute('aria-pressed', state.week==='this');
+    document.getElementById('wk-next').setAttribute('aria-pressed', state.week==='next');
+    document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed', c.dataset.age===state.age));
+    document.getElementById('tab-list').setAttribute('aria-selected', state.view==='list');
+    document.getElementById('tab-map').setAttribute('aria-selected', state.view==='map');
+    document.getElementById('view-list').hidden = state.view!=='list';
+    document.getElementById('view-map').hidden = state.view!=='map';
+    const fn = document.getElementById('filternote');
+    fn.hidden = !state.place || state.view!=='list';
+    if (state.place) document.getElementById('filternote-text').textContent = 'Nur: '+placeName(state.place);
+    renderHighlights(); renderOpen(); renderList(); renderMap();
+  }
+
+  document.getElementById('wk-this').addEventListener('click',()=>{state.week='this';render();});
+  document.getElementById('wk-next').addEventListener('click',()=>{state.week='next';render();});
+  document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{ state.age=c.dataset.age; try{localStorage.setItem('kiezkinder',JSON.stringify({age:state.age}));}catch(e){} render(); }));
+  document.getElementById('tab-list').addEventListener('click',()=>{state.view='list';render();});
+  document.getElementById('tab-map').addEventListener('click',()=>{state.view='map';render();});
+  document.getElementById('clearplace').addEventListener('click',()=>{state.place=null;render();});
+
+  Promise.all([loadJSON('manual.json'), loadJSON('events.json').catch(()=>({events:[]}))]).then(([manual, auto])=>{
+    // Venues found by the import (e.g. via berlinmitkind.de) come from events.json; hand-entered places win on conflicts
+    P = Object.assign({}, auto.places || {}, manual.places || {});
+    META = { updated: auto.updated, until: auto.until };
+    const from = fmt(monday), to = fmt(addDays(monday,13));
+    EVENTS = [].concat(auto.events||[], manual.events||[], expandPlans(manual.plans||[], from, to)).filter(e => P[e.place]);
+    if (auto.updated){ const u = parse(auto.updated); document.getElementById('stand').textContent = 'Online-Kalender abgeholt am '+u.getUTCDate()+'. '+MON[u.getUTCMonth()].replace(/\.$/,'')+'.'; }
+    const names = Object.values(manual.places || {}).map(p=>p.name);
+    const extra = Object.keys(auto.places || {}).length;
+    document.getElementById('sources').textContent = 'Dabei: ' + names.join(', ')
+      + (extra ? ' sowie '+extra+' weitere Orte aus dem Veranstaltungskalender von berlinmitkind.de (HIMBEER).' : '.');
+    const sUrl = (manual.settings||{}).suggestUrl;
+    if (sUrl && /^https:\/\/(forms\.gle|docs\.google\.com)\//.test(sUrl)){ const a = document.getElementById('suggest'); a.href = sUrl; a.hidden = false; }
+    document.getElementById('loading').hidden = true;
+    document.getElementById('app').hidden = false;
+    render();
+  }).catch(err=>{
+    document.getElementById('loading').textContent = 'Die Termine konnten nicht geladen werden. Bitte die Seite neu laden. ('+err.message+')';
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,374 @@
+{
+ "places": {
+  "wt": {
+   "name": "Bibliothek am Wasserturm",
+   "type": "Bibliothek",
+   "address": "Prenzlauer Allee 227–228, 10405 Berlin",
+   "lat": 52.5318,
+   "lng": 13.4183,
+   "url": "https://www.berlin.de/stadtbibliothek-pankow/bibliotheken/bibliothek-am-wasserturm/",
+   "auto": true,
+   "hours": {
+    "1": [
+     "08:00",
+     "22:00"
+    ],
+    "2": [
+     "08:00",
+     "22:00"
+    ],
+    "3": [
+     "08:00",
+     "22:00"
+    ],
+    "4": [
+     "08:00",
+     "22:00"
+    ],
+    "5": [
+     "08:00",
+     "22:00"
+    ],
+    "6": [
+     "08:00",
+     "22:00"
+    ]
+   },
+   "closed": [
+    [
+     "2026-12-24",
+     "2026-12-27"
+    ],
+    [
+     "2026-12-31",
+     "2027-01-03"
+    ]
+   ],
+   "hoursNote": "Mitarbeitende da: Mo, Mi, Do 13–18 · Di, Fr 11–16. Sonst Selbstbedienung.",
+   "note": "Große Kinderbibliothek mit Bilderbüchern, Spielen und Tonies. Einfach zum Schmökern vorbeikommen.",
+   "eventsUrl": "https://www.berlin.de/land/kalender/index.php?suchmaske&c=409&v_ort=37541"
+  },
+  "kt": {
+   "name": "Kurt-Tucholsky-Bibliothek",
+   "type": "Bibliothek",
+   "address": "Esmarchstraße 18, 10407 Berlin",
+   "lat": 52.5329,
+   "lng": 13.4331,
+   "url": "https://www.berlin.de/stadtbibliothek-pankow/bibliotheken/kurt-tucholsky-bibliothek/",
+   "auto": true,
+   "hours": {
+    "1": [
+     "13:00",
+     "18:00"
+    ],
+    "2": [
+     "10:00",
+     "15:00"
+    ],
+    "3": [
+     "13:00",
+     "18:00"
+    ],
+    "4": [
+     "13:00",
+     "18:00"
+    ],
+    "5": [
+     "13:00",
+     "18:00"
+    ],
+    "6": [
+     "11:00",
+     "13:00"
+    ]
+   },
+   "closed": [
+    [
+     "2026-12-24",
+     "2026-12-27"
+    ],
+    [
+     "2026-12-31",
+     "2027-01-03"
+    ]
+   ],
+   "hoursNote": "Samstags ehrenamtlich geöffnet, in den Sommerferien samstags zu.",
+   "note": "Kleine Kiezbibliothek mit Kinderbereich, Spielen und Bibliothek der Dinge.",
+   "eventsUrl": "https://www.berlin.de/land/kalender/index.php?suchmaske&c=409&v_ort=45133"
+  },
+  "hb": {
+   "name": "Heinrich-Böll-Bibliothek",
+   "type": "Bibliothek",
+   "address": "Greifswalder Straße 87, 10409 Berlin",
+   "lat": 52.5401,
+   "lng": 13.4356,
+   "url": "https://www.berlin.de/stadtbibliothek-pankow/bibliotheken/heinrich-boell-bibliothek/",
+   "auto": true,
+   "hours": {
+    "1": [
+     "09:00",
+     "19:00"
+    ],
+    "2": [
+     "09:00",
+     "19:00"
+    ],
+    "3": [
+     "13:00",
+     "19:00"
+    ],
+    "4": [
+     "09:00",
+     "19:00"
+    ],
+    "5": [
+     "09:00",
+     "19:00"
+    ],
+    "6": [
+     "10:00",
+     "19:00"
+    ],
+    "0": [
+     "10:00",
+     "19:00"
+    ]
+   },
+   "closed": [
+    [
+     "2026-12-24",
+     "2026-12-27"
+    ],
+    [
+     "2026-12-31",
+     "2027-01-03"
+    ]
+   ],
+   "hoursNote": "Mitarbeitende da: werktags ab 10 Uhr, Sa bis 15 Uhr. Sonntags ohne Service.",
+   "note": "Bezirkszentralbibliothek mit großer Kinder- und Jugendabteilung. Auch sonntags offen.",
+   "eventsUrl": "https://www.berlin.de/land/kalender/index.php?suchmaske&c=409&v_ort=41678"
+  },
+  "kh": {
+   "name": "KREATIVHAUS / Familienzentrum Fischerinsel",
+   "type": "Familienzentrum",
+   "address": "Fischerinsel 3, 10179 Berlin",
+   "lat": 52.5112,
+   "lng": 13.4069,
+   "url": "https://www.kreativhaus-berlin.de/veranstaltungen/kategorie/familie/",
+   "auto": true
+  },
+  "mam": {
+   "name": "Praxis Mamunette",
+   "type": "Kurse",
+   "address": "Winsstraße 32, 10405 Berlin",
+   "lat": 52.5338,
+   "lng": 13.4237,
+   "url": "https://mamunette.de/kurse/"
+  },
+  "msk": {
+   "name": "Familienzentrum Menschenskinder",
+   "type": "Familienzentrum",
+   "address": "Fürstenwalder Straße 30 (Nordhof), 10243 Berlin",
+   "lat": 52.5145,
+   "lng": 13.432,
+   "url": "https://www.kindaling.de/familienzentren/familienzentrum-menschenskinder/berlin-friedrichshain",
+   "contact": "familienzentrum@menschenskinder-berlin.eu · 030 235999650",
+   "note": "Familientreff: offen für alle, einfach vorbeikommen. Offener Familienraum mit Krabbeldecke für alle, die liegen, krabbeln oder schon laufen, und vielen Spielmöglichkeiten für ältere Kinder.",
+   "ageMin": 0,
+   "ageMax": 72,
+   "ageLabel": "0–6 Jahre",
+   "hours": {
+    "1": [
+     [
+      "10:00",
+      "13:00"
+     ],
+     [
+      "15:00",
+      "18:00"
+     ]
+    ],
+    "2": [
+     "10:00",
+     "13:00"
+    ],
+    "3": [
+     [
+      "10:00",
+      "13:00"
+     ],
+     [
+      "15:00",
+      "18:00"
+     ]
+    ],
+    "4": [
+     [
+      "10:00",
+      "13:00"
+     ],
+     [
+      "15:00",
+      "18:00"
+     ]
+    ],
+    "5": [
+     [
+      "10:00",
+      "13:00"
+     ],
+     [
+      "15:00",
+      "18:00"
+     ]
+    ]
+   },
+   "hoursNote": "MenschenskinderGarten täglich 9–18 Uhr geöffnet."
+  },
+  "ludo": {
+   "name": "Ludothek Prenzlauer Berg",
+   "type": "Spielort",
+   "address": "Immanuelkirchstraße 24, 2. Quergebäude, 10405 Berlin",
+   "lat": 52.5309,
+   "lng": 13.4212,
+   "url": "https://www.spielmittel.de/unsere-ludotheken/ludothek-prenzlauer-berg",
+   "ageMin": 0,
+   "ageMax": 72,
+   "ageLabel": "0–6 Jahre",
+   "note": "Spiel- und Begegnungsort mit Spielzeug für die Kleinen. Einfach während der Öffnungszeiten vorbeikommen.",
+   "hours": {
+    "2": [
+     "15:00",
+     "18:00"
+    ],
+    "3": [
+     "15:00",
+     "18:00"
+    ],
+    "4": [
+     "09:00",
+     "12:00"
+    ],
+    "5": [
+     "15:00",
+     "18:00"
+    ]
+   }
+  }
+ },
+ "plans": [
+  {
+   "id": "mam-zumbini",
+   "place": "mam",
+   "weekday": 3,
+   "start": "15:45",
+   "end": "16:30",
+   "title": "Zumbini (auf Englisch)",
+   "ageMin": 0,
+   "ageMax": 48,
+   "note": "Nicht in den Schulferien.",
+   "signup": "Voranmeldung evtl. nötig",
+   "cost": "",
+   "validFrom": "2026-10-26",
+   "validTo": "",
+   "skip": []
+  },
+  {
+   "id": "mam-mfe-di1",
+   "place": "mam",
+   "weekday": 2,
+   "start": "15:45",
+   "end": "16:30",
+   "title": "Musikalische Früherziehung",
+   "ageMin": 36,
+   "ageMax": 48,
+   "note": "Nicht in den Schulferien.",
+   "signup": "Voranmeldung evtl. nötig",
+   "cost": "",
+   "validFrom": "2026-10-26",
+   "validTo": "",
+   "skip": []
+  },
+  {
+   "id": "mam-mfe-di2",
+   "place": "mam",
+   "weekday": 2,
+   "start": "16:35",
+   "end": "17:20",
+   "title": "Musikalische Früherziehung",
+   "ageMin": 36,
+   "ageMax": 48,
+   "note": "Nicht in den Schulferien.",
+   "signup": "Voranmeldung evtl. nötig",
+   "cost": "",
+   "validFrom": "2026-10-26",
+   "validTo": "",
+   "skip": []
+  },
+  {
+   "id": "mam-mfe-di3",
+   "place": "mam",
+   "weekday": 2,
+   "start": "17:25",
+   "end": "18:10",
+   "title": "Musikalische Früherziehung",
+   "ageMin": 48,
+   "ageMax": 72,
+   "note": "Nicht in den Schulferien.",
+   "signup": "Voranmeldung evtl. nötig",
+   "cost": "",
+   "validFrom": "2026-10-26",
+   "validTo": "",
+   "skip": []
+  },
+  {
+   "id": "mam-mfe-do1",
+   "place": "mam",
+   "weekday": 4,
+   "start": "15:45",
+   "end": "16:30",
+   "title": "Musikalische Früherziehung",
+   "ageMin": 24,
+   "ageMax": 36,
+   "note": "Nicht in den Schulferien.",
+   "signup": "Voranmeldung evtl. nötig",
+   "cost": "",
+   "validFrom": "2026-10-26",
+   "validTo": "",
+   "skip": []
+  },
+  {
+   "id": "mam-mfe-do2",
+   "place": "mam",
+   "weekday": 4,
+   "start": "16:35",
+   "end": "17:20",
+   "title": "Musikalische Früherziehung",
+   "ageMin": 48,
+   "ageMax": 60,
+   "note": "Nicht in den Schulferien.",
+   "signup": "Voranmeldung evtl. nötig",
+   "cost": "",
+   "validFrom": "2026-10-26",
+   "validTo": "",
+   "skip": []
+  },
+  {
+   "id": "mam-mfe-do3",
+   "place": "mam",
+   "weekday": 4,
+   "start": "17:25",
+   "end": "18:10",
+   "title": "Musikalische Früherziehung",
+   "ageMin": 60,
+   "ageMax": 72,
+   "note": "Nicht in den Schulferien.",
+   "signup": "Voranmeldung evtl. nötig",
+   "cost": "",
+   "validFrom": "2026-10-26",
+   "validTo": "",
+   "skip": []
+  }
+ ],
+ "events": []
+}

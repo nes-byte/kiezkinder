@@ -254,6 +254,14 @@
      "18:00"
     ]
    }
+  },
+  "planetarium": {
+   "name": "Zeiss-Großplanetarium",
+   "type": "Planetarium",
+   "address": "Prenzlauer Allee 80, 10405 Berlin",
+   "lat": 52.5428,
+   "lng": 13.4268,
+   "url": "https://www.planetarium.berlin/veranstaltungen/bebe-symphonique"
   }
  },
  "plans": [
@@ -368,6 +376,40 @@
    "validFrom": "2026-10-26",
    "validTo": "",
    "skip": []
+  },
+  {
+   "id": "planetarium-bebe-1",
+   "place": "planetarium",
+   "weekday": 6,
+   "start": "10:30",
+   "end": "11:05",
+   "title": "Bébé Symphonique",
+   "ageMin": 0,
+   "ageMax": 36,
+   "note": "Musik und Farbenspiel unter der Kuppel für Babys und Kleinkinder mit ihren Eltern, 35 Minuten. Decke für die freie Fläche mitbringen. Fürs Kind ein 0-€-Ticket mitbuchen.",
+   "signup": "Tickets vorab buchen",
+   "cost": "Erwachsene 12 €, Kinder 0–3 frei",
+   "validFrom": "2026-11-14",
+   "validTo": "2026-12-12",
+   "skip": [],
+   "highlight": true
+  },
+  {
+   "id": "planetarium-bebe-2",
+   "place": "planetarium",
+   "weekday": 6,
+   "start": "11:30",
+   "end": "12:05",
+   "title": "Bébé Symphonique",
+   "ageMin": 0,
+   "ageMax": 36,
+   "note": "Musik und Farbenspiel unter der Kuppel für Babys und Kleinkinder mit ihren Eltern, 35 Minuten. Decke für die freie Fläche mitbringen. Fürs Kind ein 0-€-Ticket mitbuchen.",
+   "signup": "Tickets vorab buchen",
+   "cost": "Erwachsene 12 €, Kinder 0–3 frei",
+   "validFrom": "2026-11-14",
+   "validTo": "2026-12-12",
+   "skip": [],
+   "highlight": true
   }
  ],
  "events": []

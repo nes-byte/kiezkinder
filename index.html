@@ -505,7 +505,11 @@ footer strong{color:var(--ink)}
     P = Object.assign({}, auto.places || {}, manual.places || {});
     META = { updated: auto.updated, until: auto.until };
     const from = fmt(monday), to = fmt(addDays(monday,13));
-    EVENTS = [].concat(auto.events||[], manual.events||[], expandPlans(manual.plans||[], from, to)).filter(e => P[e.place]);
+    // Hand-entered entries win: an imported event with the same day, start time and title is dropped
+    const mine = [].concat(manual.events||[], expandPlans(manual.plans||[], from, to));
+    const key = e => e.date+'|'+(e.start||'')+'|'+(e.title||'').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g,'').slice(0,14);
+    const taken = new Set(mine.map(key));
+    EVENTS = [].concat((auto.events||[]).filter(e => !taken.has(key(e))), mine).filter(e => P[e.place]);
     if (auto.updated){ const u = parse(auto.updated); document.getElementById('stand').textContent = 'Online-Kalender abgeholt am '+u.getUTCDate()+'. '+MON[u.getUTCMonth()].replace(/\.$/,'')+'.'; }
     const names = Object.values(manual.places || {}).map(p=>p.name);
     const extra = Object.keys(auto.places || {}).length;

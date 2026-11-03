@@ -200,7 +200,7 @@ footer strong{color:var(--ink)}
       <div id="view-list" style="display:flex;flex-direction:column;gap:18px"></div>
       <div id="view-map" hidden>
         <div class="mapcard">
-          <svg id="map" viewBox="0 0 360 552" role="img" aria-label="Kiezkarte mit den Orten"></svg>
+          <svg id="map" viewBox="0 0 432 552" role="img" aria-label="Kiezkarte mit den Orten"></svg>
           <div class="legend" id="legend"></div>
         </div>
       </div>
@@ -423,7 +423,7 @@ footer strong{color:var(--ink)}
   }
 
   // Hand-drawn map: equirectangular projection over Prenzlauer Berg, Mitte and Friedrichshain
-  const BOX = {w:360,h:552, lng0:13.398, lng1:13.448, lat0:52.506, lat1:52.552};
+  const BOX = {w:432,h:552, lng0:13.398, lng1:13.458, lat0:52.506, lat1:52.552};
   const X = lng => (lng-BOX.lng0)/(BOX.lng1-BOX.lng0)*BOX.w;
   const Y = lat => BOX.h - (lat-BOX.lat0)/(BOX.lat1-BOX.lat0)*BOX.h;
   const line = pts => 'M'+pts.map(p=>X(p[1]).toFixed(1)+' '+Y(p[0]).toFixed(1)).join(' L');
@@ -444,6 +444,7 @@ footer strong{color:var(--ink)}
       [[52.5291,13.4105],[52.5520,13.4135]],                // Schönhauser Allee
       [[52.5247,13.4155],[52.5520,13.4270]],                // Prenzlauer Allee
       [[52.5262,13.4248],[52.5450,13.4430]],                // Greifswalder Str.
+      [[52.5262,13.4248],[52.5400,13.4390],[52.5470,13.4500],[52.5510,13.4570]], // Greifswalder Str. / Berliner Allee (M4)
       [[52.5410,13.4000],[52.5398,13.4250],[52.5390,13.4460]], // Eberswalder / Danziger Str.
       [[52.5292,13.3990],[52.5272,13.4150],[52.5252,13.4300],[52.5235,13.4460]], // Torstr. / Mollstr.
       [[52.5220,13.4132],[52.5175,13.4460]],                // Karl-Marx-Allee
@@ -451,7 +452,7 @@ footer strong{color:var(--ink)}
     ].forEach(p => svg.append(s('path',{class:'map-street',d:line(p)})));
     [['Schönhauser Allee',52.5350,13.4090,-86],['Prenzlauer Allee',52.5370,13.4185,-70],['Greifswalder Str.',52.5330,13.4300,-48],
      ['Danziger Str.',52.5408,13.4180,-1],['Karl-Marx-Allee',52.5208,13.4220,-8],['Alexanderplatz',52.5232,13.4040,0],
-     ['Spree',52.5108,13.4140,-28],['Mauerpark',52.5462,13.4000,0],['Volkspark',52.5276,13.4300,0]]
+     ['Spree',52.5108,13.4140,-28],['Mauerpark',52.5462,13.4000,0],['Volkspark',52.5276,13.4300,0],['Weißensee',52.5520,13.4480,0]]
       .forEach(([t,la,ln,rot])=>{ const x=X(ln),y=Y(la); svg.append(s('text',{class:'map-label',x,y,transform:`rotate(${rot} ${x} ${y})`},t)); });
 
     const counts = countByPlace();

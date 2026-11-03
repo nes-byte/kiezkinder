@@ -16,6 +16,7 @@ Wochenübersicht mit Terminen für Kinder von 0 bis 6 Jahren in Prenzlauer Berg,
 |---|---|---|
 | Stadtbibliothek Pankow (berlin.de) | Kinder-Termine von Wasserturm, Tucholsky und Böll | diese 3 Bibliotheken |
 | KREATIVHAUS (Fischerinsel) | Kategorie „Familie & Kinder“ | Fischerinsel |
+| Familienzentrum Weißensee | Kurskalender ohne reine Beratungs- und Erwachsenenangebote | Mahlerstraße 4 |
 | berlinmitkind.de (HIMBEER Verlag) | Veranstaltungskalender, Altersgruppen Baby und Kita | nur Orte mit PLZ in Prenzlauer Berg, Mitte-Ost und Friedrichshain |
 
 Von berlinmitkind.de werden nur Datum, Uhrzeit, Titel, Ort und Altersangabe übernommen, keine Beschreibungstexte. Jeder Termin verlinkt zurück auf die Originalseite. Termine von Orten, die wir direkt abholen, zum Beispiel den Bibliotheken, werden dort übersprungen, damit nichts doppelt erscheint.

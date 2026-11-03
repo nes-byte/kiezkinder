@@ -3,6 +3,7 @@
 Quellen:
   - Stadtbibliothek Pankow (Kalender auf berlin.de), gefiltert nach Ort und Kategorie "Kinder, Jugendliche"
   - KREATIVHAUS / Familienzentrum Fischerinsel, Kategorie "Familie & Kinder"
+  - Familienzentrum Weißensee, Kurskalender ohne reine Beratungs- und Erwachsenenangebote
   - berlinmitkind.de (HIMBEER), nur Orte mit Postleitzahl in AREA_PLZ, nur Fakten + Link zurück
 
 Nicht dabei: kindaling.de, weil die Nutzungsbedingungen das Kopieren von Inhalten untersagen.
@@ -15,7 +16,6 @@ import sys
 import time
 import datetime as dt
 from pathlib import Path
-from urllib import robotparser
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -39,17 +39,61 @@ _robots = {}
 _last_hit = {}
 
 
+def _robots_rules(text):
+    """robots.txt mit Längster-Treffer-Regel lesen (wie Google), damit z. B.
+    "Disallow: /wp-admin/" + "Allow: /wp-admin/admin-ajax.php" richtig ausgewertet wird."""
+    groups, agents, rules, last_was_agent = [], [], [], False
+    for raw in text.splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if ":" not in line:
+            continue
+        key, val = (x.strip() for x in line.split(":", 1))
+        key = key.lower()
+        if key == "user-agent":
+            if not last_was_agent and (agents or rules):
+                groups.append((agents, rules))
+                agents, rules = [], []
+            agents.append(val.lower())
+            last_was_agent = True
+        else:
+            last_was_agent = False
+            if key in ("allow", "disallow", "crawl-delay"):
+                rules.append((key, val))
+    if agents or rules:
+        groups.append((agents, rules))
+    me = USER_AGENT.split("/")[0].lower()
+    own = [r for a, r in groups if any(x != "*" and x in me for x in a)]
+    chosen = own or [r for a, r in groups if "*" in a]
+    return [rule for rs in chosen for rule in rs]
+
+
+def _match(pattern, path):
+    if not pattern:
+        return False
+    regex = re.escape(pattern).replace(r"\*", ".*")
+    if regex.endswith(r"\$"):
+        regex = regex[:-2] + "$"
+    return re.match(regex, path) is not None
+
+
 def allowed(url):
-    host = urlparse(url).scheme + "://" + urlparse(url).netloc
+    parts = urlparse(url)
+    host = parts.scheme + "://" + parts.netloc
     if host not in _robots:
-        rp = robotparser.RobotFileParser()
         try:
             r = session.get(host + "/robots.txt", timeout=20)
-            rp.parse(r.text.splitlines() if r.ok else [])
+            _robots[host] = _robots_rules(r.text if r.ok else "")
         except requests.RequestException:
-            rp.parse([])
-        _robots[host] = rp
-    return _robots[host].can_fetch(USER_AGENT, url), _robots[host].crawl_delay(USER_AGENT) or 2
+            _robots[host] = []
+    rules = _robots[host]
+    path = parts.path + ("?" + parts.query if parts.query else "")
+    best, verdict = -1, True
+    for key, val in rules:
+        if key in ("allow", "disallow") and _match(val, path) and len(val) >= best:
+            if len(val) > best or key == "allow":
+                best, verdict = len(val), key == "allow"
+    delay = next((float(v) for k, v in rules if k == "crawl-delay" and re.match(r"^\d+(\.\d+)?$", v)), 2)
+    return verdict, delay
 
 
 def get(url):
@@ -71,6 +115,14 @@ def get(url):
 
 def parse_age(text):
     t = text.replace("–", "-").replace("&#8211;", "-")
+    m = re.search(r"(\d+)\s*(Woche|Monat)\w*\s*(?:-|bis|und)\s*(\d+(?:,5)?)\s*(Monat|Jahr)", t, re.I)
+    if m:
+        lo = 0 if m.group(2).lower().startswith("woche") else int(m.group(1))
+        hi = float(m.group(3).replace(",", "."))
+        return lo, int(hi * 12) if m.group(4).lower().startswith("jahr") else int(hi)
+    m = re.search(r"bis\s*(\d+),5\s*Jahr", t, re.I)
+    if m:
+        return 0, int(m.group(1)) * 12 + 6
     m = re.search(r"(\d+)\s*(?:-|bis)\s*(\d+)\s*Monat", t, re.I)
     if m:
         return int(m.group(1)), int(m.group(2))
@@ -100,7 +152,7 @@ def age_label(lo, hi):
         return f"ab {fmt(lo)} Jahren" if lo >= 24 or lo % 12 == 0 else f"ab {lo} Monaten"
     if lo in (0, None):
         return f"bis {hi} Monate" if hi <= 24 else f"bis {hi // 12} Jahre"
-    if hi <= 24:
+    if hi <= 24 and not (lo % 12 == 0 and hi % 12 == 0):
         return f"{lo}–{hi} Monate"
     return f"{lo // 12}–{hi // 12} Jahre"
 
@@ -120,6 +172,8 @@ def signup_of(text):
 
 
 def cost_of(text):
+    if re.search(r"Spende", text, re.I):
+        return "Spende erbeten"
     if re.search(r"kostenlos|kostenfrei|Eintritt frei|gebührenfrei", text, re.I):
         return "kostenlos"
     if re.search(r"kostenpflichtig|\d+\s*(€|Euro)", text, re.I):
@@ -261,7 +315,7 @@ AREA_PLZ = {
     "10115", "10119", "10178", "10179",                     # Mitte, nah dran
     "10243", "10245", "10247", "10249",                     # Friedrichshain
 }
-OWN_VENUES = re.compile(r"Wasserturm|Tucholsky|Heinrich-B[öo]ll-Bibliothek|Kreativhaus|Fischerinsel|Menschenskinder|Mamunette|Ludothek", re.I)
+OWN_VENUES = re.compile(r"Familienzentrum Wei(ß|ss)ensee|Wasserturm|Tucholsky|Heinrich-B[öo]ll-Bibliothek|Kreativhaus|Fischerinsel|Menschenskinder|Mamunette|Ludothek", re.I)
 BMK_HIGHLIGHT = {"Fest", "Flohmarkt"}
 VENUES = ROOT / "data" / "venues.json"
 _venues = json.loads(VENUES.read_text(encoding="utf-8")) if VENUES.exists() else {}
@@ -396,6 +450,42 @@ def fetch_berlinmitkind(start, stop):
     return events, places
 
 
+# ---------- Familienzentrum Weißensee (Kurskalender, JSON vom Plugin "Weekly Class") ----------
+
+FZW_SKIP = re.compile(r"Beratung|Sprechstunde|Geburtstrauma|Yoga|Strick|Schwangeren|ElternRaum", re.I)
+
+
+def fetch_weissensee(start, stop):
+    print("Familienzentrum Weißensee")
+    url = ("https://www.familienzentrum-weissensee.de/wp-admin/admin-ajax.php?action=wcs_get_events_json"
+           "&content%5Bwcs_type%5D%5B%5D=27&content%5Bwcs_type%5D%5B%5D=30"
+           "&content%5Bwcs_type%5D%5B%5D=28&content%5Bwcs_type%5D%5B%5D=29"
+           f"&start={start.isoformat()}&end={stop.isoformat()}")
+    raw = get(url)
+    if not raw:
+        return []
+    events = []
+    for e in json.loads(raw):
+        title = " ".join(BeautifulSoup(e.get("title", ""), "html.parser").get_text(" ").split())
+        if not title or FZW_SKIP.search(title):
+            continue
+        date, start_t, end_t = e["start"][:10], e["start"][11:16], (e.get("end") or "")[11:16]
+        if date in str((e.get("meta") or {}).get("_wcs_canceled", "")):
+            continue  # fällt an diesem Tag aus
+        text = " ".join(BeautifulSoup(e.get("excerpt", ""), "html.parser").get_text(" ").split())
+        lo, hi = parse_age(title + " " + text)
+        if not keep(lo, hi):
+            continue
+        events.append({
+            "date": date, "start": start_t, "end": end_t, "title": title, "place": "fzw",
+            "ageMin": lo, "ageMax": hi, "ageLabel": age_label(lo, hi),
+            "signup": signup_of(text), "cost": cost_of(text), "highlight": False,
+            "url": e.get("permalink") or "https://www.familienzentrum-weissensee.de/kurskalender-neu/",
+            "source": "auto",
+        })
+    return events
+
+
 def main():
     today = dt.date.today()
     stop = today + dt.timedelta(days=DAYS_AHEAD)
@@ -409,7 +499,8 @@ def main():
     except Exception as e:
         print(f"berlinmitkind.de fehlgeschlagen: {e}", file=sys.stderr)
         problems.append(f"berlinmitkind.de: {e}")
-    for name, fn in (("Bibliotheken", fetch_libraries), ("KREATIVHAUS", fetch_kreativhaus)):
+    for name, fn in (("Bibliotheken", fetch_libraries), ("KREATIVHAUS", fetch_kreativhaus),
+                     ("Familienzentrum Weißensee", fetch_weissensee)):
         try:
             got = fn(today, stop)
             print(f"{name}: {len(got)} Termine")

@@ -262,6 +262,15 @@
    "lat": 52.5428,
    "lng": 13.4268,
    "url": "https://www.planetarium.berlin/veranstaltungen/bebe-symphonique"
+  },
+  "fzw": {
+   "name": "Familienzentrum Weißensee",
+   "type": "Familienzentrum",
+   "address": "Mahlerstraße 4, 13088 Berlin (Tram M4 Antonplatz)",
+   "lat": 52.5482,
+   "lng": 13.4527,
+   "url": "https://www.familienzentrum-weissensee.de/kurskalender-neu/",
+   "auto": true
   }
  },
  "plans": [

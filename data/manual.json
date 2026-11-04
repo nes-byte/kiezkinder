@@ -271,6 +271,22 @@
    "lng": 13.4527,
    "url": "https://www.familienzentrum-weissensee.de/kurskalender-neu/",
    "auto": true
+  },
+  "ks-roller": {
+   "name": "Kinderturnen Heinrich-Roller-Grundschule",
+   "type": "Kurs (Verein)",
+   "address": "Heinrich-Roller-Straße 18, 10405 Berlin (untere Halle)",
+   "lat": 52.531,
+   "lng": 13.4241,
+   "url": "https://kindersport-aus-berlin.de/kindersport/kinderturnen/betreuter-kindersport.html"
+  },
+  "ks-christburg": {
+   "name": "Kinderturnen Christburg Campus",
+   "type": "Kurs (Verein)",
+   "address": "Christburger Str. 14, 10407 Berlin",
+   "lat": 52.5352,
+   "lng": 13.4284,
+   "url": "https://kindersport-aus-berlin.de/kindersport/kinderturnen/betreuter-kindersport.html"
   }
  },
  "plans": [
@@ -419,6 +435,86 @@
    "validTo": "2026-12-12",
    "skip": [],
    "highlight": true
+  },
+  {
+   "id": "ks-roller-sa1",
+   "place": "ks-roller",
+   "weekday": 6,
+   "start": "09:00",
+   "end": "09:45",
+   "title": "Eltern-Kind-Turnen",
+   "ageMin": 12,
+   "ageMax": 36,
+   "note": "Betreuter Kindersport von Kindersport aus Berlin, spielerisch mit Fokus auf Bewegung. Mit Eltern.",
+   "signup": "Anmeldung nötig, Probetraining möglich",
+   "cost": "Mitgliedschaft 30 €/Monat",
+   "validFrom": "2026-11-04",
+   "validTo": "",
+   "skip": []
+  },
+  {
+   "id": "ks-roller-sa2",
+   "place": "ks-roller",
+   "weekday": 6,
+   "start": "10:00",
+   "end": "10:45",
+   "title": "Kinderturnen",
+   "ageMin": 36,
+   "ageMax": 48,
+   "note": "Betreuter Kindersport von Kindersport aus Berlin, spielerisch mit Fokus auf Bewegung. Kinder turnen ohne Eltern.",
+   "signup": "Anmeldung nötig, Probetraining möglich",
+   "cost": "Mitgliedschaft 30 €/Monat",
+   "validFrom": "2026-11-04",
+   "validTo": "",
+   "skip": []
+  },
+  {
+   "id": "ks-roller-so1",
+   "place": "ks-roller",
+   "weekday": 7,
+   "start": "10:00",
+   "end": "10:45",
+   "title": "Eltern-Kind-Turnen",
+   "ageMin": 12,
+   "ageMax": 36,
+   "note": "Betreuter Kindersport von Kindersport aus Berlin, spielerisch mit Fokus auf Bewegung. Mit Eltern.",
+   "signup": "Anmeldung nötig, Probetraining möglich",
+   "cost": "Mitgliedschaft 30 €/Monat",
+   "validFrom": "2026-11-04",
+   "validTo": "",
+   "skip": []
+  },
+  {
+   "id": "ks-roller-so2",
+   "place": "ks-roller",
+   "weekday": 7,
+   "start": "11:00",
+   "end": "11:45",
+   "title": "Kinderturnen",
+   "ageMin": 36,
+   "ageMax": 60,
+   "note": "Betreuter Kindersport von Kindersport aus Berlin, spielerisch mit Fokus auf Bewegung. Kinder turnen ohne Eltern.",
+   "signup": "Anmeldung nötig, Probetraining möglich",
+   "cost": "Mitgliedschaft 30 €/Monat",
+   "validFrom": "2026-11-04",
+   "validTo": "",
+   "skip": []
+  },
+  {
+   "id": "ks-christburg-so",
+   "place": "ks-christburg",
+   "weekday": 7,
+   "start": "09:00",
+   "end": "09:45",
+   "title": "Eltern-Kind-Turnen",
+   "ageMin": 12,
+   "ageMax": 36,
+   "note": "Betreuter Kindersport von Kindersport aus Berlin, spielerisch mit Fokus auf Bewegung. Mit Eltern.",
+   "signup": "Anmeldung nötig, Probetraining möglich",
+   "cost": "Mitgliedschaft 30 €/Monat",
+   "validFrom": "2026-11-04",
+   "validTo": "",
+   "skip": []
   }
  ],
  "events": []

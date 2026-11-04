@@ -56,6 +56,10 @@ h1 em{font-style:italic;color:var(--accent)}
 .chip[data-age="baby"][aria-pressed="true"]{background:var(--mint)}
 .chip[data-age="klein"][aria-pressed="true"]{background:var(--sun)}
 .chip[data-age="kita"][aria-pressed="true"]{background:var(--rose)}
+.bchip{border-width:1.5px;font-size:13.5px;padding:5px 12px}
+.bchip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.fchip{border-style:dashed;border-width:1.5px;font-size:13.5px;padding:5px 12px}
+.fchip[aria-pressed="true"]{background:var(--mint);color:var(--chip-ink);border-style:solid}
 
 .sectionhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
 h2{font-family:var(--f-display);font-variation-settings:"SOFT" 100;font-weight:650;font-size:26px;margin:0}
@@ -173,6 +177,16 @@ footer strong{color:var(--ink)}
       <button class="chip" type="button" data-age="klein" aria-pressed="false">Kleinkind 1–3</button>
       <button class="chip" type="button" data-age="kita" aria-pressed="false">Kita 3–6</button>
     </div>
+    <div class="chips" role="group" aria-label="Bereich filtern">
+      <button class="chip bchip" type="button" data-cat="all" aria-pressed="true">Alles</button>
+      <button class="chip bchip" type="button" data-cat="treff" aria-pressed="false">Offene Treffs</button>
+      <button class="chip bchip" type="button" data-cat="bewegung" aria-pressed="false">Bewegung</button>
+      <button class="chip bchip" type="button" data-cat="musik" aria-pressed="false">Musik</button>
+      <button class="chip bchip" type="button" data-cat="lesen" aria-pressed="false">Bücher, Sprache &amp; Theater</button>
+      <button class="chip bchip" type="button" data-cat="kreativ" aria-pressed="false">Basteln</button>
+      <button class="chip bchip" type="button" data-cat="besonders" aria-pressed="false">Feste &amp; Besonderes</button>
+      <button class="chip fchip" type="button" id="free" aria-pressed="false">Ohne Anmeldung</button>
+    </div>
   </div>
 
   <div id="loading" class="loading">Termine werden geladen …</div>
@@ -248,8 +262,23 @@ footer strong{color:var(--ink)}
   const AGE = { all:null, baby:[0,12], klein:[12,36], kita:[36,72] };
   const pinColors = ['var(--sun)','var(--rose)','var(--sky)','var(--accent)'];
 
-  const state = { week:'this', age:'all', view:'list', place:null };
-  try{ const s = JSON.parse(localStorage.getItem('kiezkinder')||'{}'); if (s.age && s.age in AGE) state.age = s.age; }catch(e){}
+  const state = { week:'this', age:'all', cat:'all', free:false, view:'list', place:null };
+  // Bereiche: erkannt am Titel und Hinweis. Ein Eintrag kann in mehreren Bereichen sein; "cat" im Eintrag überschreibt die Erkennung.
+  const CATS = {
+    treff: /treff|caf[eé]|spielinsel|spielgruppe|krabbel|frühstück|brunch|grupo de juego|vater-kind|spielzimmer|spielenachmittag|gaming|winter-spiel-raum|spiel-bau|bewegungsbaustelle|hopplahopp|familiennachmittag/i,
+    bewegung: /turnen|bewegung|hopplahopp|tanz|zirkus|jonglage|move it|spiel-bau|bewegungsbaustelle|winter-spiel-raum|zumbini|dancers|yoga|sport/i,
+    musik: /musik|singen|zumbini|früherziehung|symphon|konzert|music|stimme an|lieder/i,
+    lesen: /theater|puppen|bilderbuch|lese|kino|kamishibai|geschichte|kasper|marionette|podesthelden|vorles|buch|bibliothek|sprach|deutsch lernen|englisch/i,
+    kreativ: /bastel|kreativ|werkstatt|atelier|keramik|laterne|malen|lego|tonne|holz|workshop|druck|nähen|basteln|zusammenbau/i,
+    besonders: /fest|brunch|willkommen|umzug|flohmarkt|markt|ausflug/i,
+  };
+  const catOf = e => Object.keys(CATS).filter(k => (e.cat||'').includes(k) || CATS[k].test((e.title||'')+' '+(e.note||'')) || (k==='besonders' && e.highlight));
+  function catMatch(e){ return state.cat==='all' || catOf(e).includes(state.cat); }
+  const needsSignup = e => /nötig|anmeldung:|anmeldung ab|buchen|erbeten|nur mit/i.test(e.signup||'');
+  function freeMatch(e){ return !state.free || !needsSignup(e); }
+  const openCatOk = () => state.cat==='all' || state.cat==='treff';
+  try{ const s = JSON.parse(localStorage.getItem('kiezkinder')||'{}'); if (s.age && s.age in AGE) state.age = s.age; if (s.cat && (s.cat==='all' || s.cat in CATS)) state.cat = s.cat; state.free = !!s.free; }catch(e){}
+  function remember(){ try{ localStorage.setItem('kiezkinder', JSON.stringify({age:state.age, cat:state.cat, free:state.free})); }catch(e){} }
 
   function berlinToday(){
     try{ return new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()); }
@@ -308,7 +337,7 @@ footer strong{color:var(--ink)}
     return 'age-kita';
   }
   function inWeek(e){ const [a,b] = weeks[state.week]; return e.date>=a && e.date<=b; }
-  function visible(){ return EVENTS.filter(e => inWeek(e) && ageMatch(e) && (!state.place || e.place===state.place))
+  function visible(){ return EVENTS.filter(e => inWeek(e) && ageMatch(e) && catMatch(e) && freeMatch(e) && (!state.place || e.place===state.place))
     .sort((a,b)=> (a.date+a.start).localeCompare(b.date+b.start)); }
 
   function el(tag, attrs, ...kids){
@@ -323,7 +352,7 @@ footer strong{color:var(--ink)}
 
   function renderHighlights(){
     const box = document.getElementById('hl'); box.replaceChildren();
-    const list = EVENTS.filter(e => e.highlight && inWeek(e) && ageMatch(e)).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+    const list = EVENTS.filter(e => e.highlight && inWeek(e) && ageMatch(e) && catMatch(e) && freeMatch(e)).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
     document.getElementById('hl-count').textContent = list.length ? list.length + (list.length===1?' Tipp':' Tipps') : '';
     if (!list.length){ box.append(el('div',{class:'empty'},'Für diese Auswahl gibt es keine besonderen Highlights. Unten stehen alle regelmäßigen Termine.')); return; }
     for (const e of list){
@@ -355,8 +384,8 @@ footer strong{color:var(--ink)}
 
   function renderOpen(){
     const box = document.getElementById('openplaces'); box.replaceChildren();
-    const ids = openIds().filter(id => ageMatch(P[id]));
-    document.getElementById('open-section').hidden = !openIds().length;
+    const ids = openCatOk() ? openIds().filter(id => ageMatch(P[id])) : [];
+    document.getElementById('open-section').hidden = !openIds().length || !openCatOk();
     if (!ids.length){ box.append(el('div',{class:'empty'},'Für diese Altersgruppe ist noch kein offener Ort eingetragen.')); return; }
     const todayWd = td.getUTCDay();
     const openNow = id => !!currentWindow(id);
@@ -385,13 +414,13 @@ footer strong{color:var(--ink)}
     const box = document.getElementById('view-list'); box.replaceChildren();
     const byDay = {};
     for (const e of visible()) (byDay[e.date] ||= []).push(e);
-    const openToday = ds => openIds().filter(id => (!state.place || state.place===id) && ageMatch(P[id]) && openOn(id, ds));
+    const openToday = ds => openCatOk() ? openIds().filter(id => (!state.place || state.place===id) && ageMatch(P[id]) && openOn(id, ds)) : [];
     const days = weekDates().filter(ds => byDay[ds] || openToday(ds).length);
     if (META.until && weeks[state.week][1] > META.until){
       const u = parse(META.until);
       box.append(el('div',{class:'empty'},'Die Online-Kalender sind bis '+u.getUTCDate()+'. '+MON[u.getUTCMonth()]+' geladen. Spätere Termine kommen beim nächsten Abruf dazu.'));
     }
-    if (!days.length){ box.append(el('div',{class:'empty'},'Keine Termine für diese Auswahl. Probier eine andere Altersgruppe oder die andere Woche.')); return; }
+    if (!days.length){ box.append(el('div',{class:'empty'},'Keine Termine für diese Auswahl. Probier einen anderen Bereich, eine andere Altersgruppe oder die andere Woche.')); return; }
     for (const ds of days){
       const d = dayLabel(ds);
       const day = el('div',{class:'day'},
@@ -431,8 +460,8 @@ footer strong{color:var(--ink)}
   function s(tag, attrs, text){ const n=document.createElementNS(NS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); if(text) n.textContent=text; return n; }
   // Places that only have opening hours (no events at all) count their open days; everything else counts events
   const pureOpen = id => openIds().includes(id) && !EVENTS.some(e => e.place === id);
-  function countByPlace(){ const c={}; EVENTS.filter(e=>inWeek(e)&&ageMatch(e)).forEach(e=>c[e.place]=(c[e.place]||0)+1);
-    for (const id of openIds()) if (pureOpen(id)) c[id] = ageMatch(P[id]) ? weekDates().filter(ds=>openOn(id,ds)).length : 0; return c; }
+  function countByPlace(){ const c={}; EVENTS.filter(e=>inWeek(e)&&ageMatch(e)&&catMatch(e)&&freeMatch(e)).forEach(e=>c[e.place]=(c[e.place]||0)+1);
+    for (const id of openIds()) if (pureOpen(id)) c[id] = ageMatch(P[id]) && openCatOk() ? weekDates().filter(ds=>openOn(id,ds)).length : 0; return c; }
 
   function renderMap(){
     const svg = document.getElementById('map'); svg.replaceChildren();
@@ -483,7 +512,9 @@ footer strong{color:var(--ink)}
   function render(){
     document.getElementById('wk-this').setAttribute('aria-pressed', state.week==='this');
     document.getElementById('wk-next').setAttribute('aria-pressed', state.week==='next');
-    document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed', c.dataset.age===state.age));
+    document.querySelectorAll('.chip[data-age]').forEach(c=>c.setAttribute('aria-pressed', c.dataset.age===state.age));
+    document.querySelectorAll('.chip[data-cat]').forEach(c=>c.setAttribute('aria-pressed', c.dataset.cat===state.cat));
+    document.getElementById('free').setAttribute('aria-pressed', state.free);
     document.getElementById('tab-list').setAttribute('aria-selected', state.view==='list');
     document.getElementById('tab-map').setAttribute('aria-selected', state.view==='map');
     document.getElementById('view-list').hidden = state.view!=='list';
@@ -496,7 +527,9 @@ footer strong{color:var(--ink)}
 
   document.getElementById('wk-this').addEventListener('click',()=>{state.week='this';render();});
   document.getElementById('wk-next').addEventListener('click',()=>{state.week='next';render();});
-  document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{ state.age=c.dataset.age; try{localStorage.setItem('kiezkinder',JSON.stringify({age:state.age}));}catch(e){} render(); }));
+  document.querySelectorAll('.chip[data-age]').forEach(c=>c.addEventListener('click',()=>{ state.age=c.dataset.age; remember(); render(); }));
+  document.querySelectorAll('.chip[data-cat]').forEach(c=>c.addEventListener('click',()=>{ state.cat=c.dataset.cat; remember(); render(); }));
+  document.getElementById('free').addEventListener('click',()=>{ state.free=!state.free; remember(); render(); });
   document.getElementById('tab-list').addEventListener('click',()=>{state.view='list';render();});
   document.getElementById('tab-map').addEventListener('click',()=>{state.view='map';render();});
   document.getElementById('clearplace').addEventListener('click',()=>{state.place=null;render();});
@@ -510,7 +543,7 @@ footer strong{color:var(--ink)}
     const mine = [].concat(manual.events||[], expandPlans(manual.plans||[], from, to));
     const key = e => e.date+'|'+(e.start||'')+'|'+(e.title||'').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g,'').slice(0,14);
     const taken = new Set(mine.map(key));
-    EVENTS = [].concat((auto.events||[]).filter(e => !taken.has(key(e))), mine).filter(e => P[e.place]);
+    EVENTS = [].concat((auto.events||[]).filter(e => !taken.has(key(e))), mine).filter(e => P[e.place] && !isClosedDay(e.place, e.date));
     if (auto.updated){ const u = parse(auto.updated); document.getElementById('stand').textContent = 'Aktualisiert am '+u.getUTCDate()+'. '+MON[u.getUTCMonth()].replace(/\.$/,'')+'.'; }
     const names = Object.values(manual.places || {}).map(p=>p.name);
     const extra = Object.keys(auto.places || {}).length;

@@ -421,7 +421,7 @@ footer strong{color:var(--ink)}
         p.note? el('p',{style:'margin:0;color:var(--muted);font-size:14.5px'},p.note):null,
         grid,
         p.hoursNote? el('p',{style:'margin:0;color:var(--muted);font-size:13px'},p.hoursNote):null,
-        el('div',{class:'tags'}, p.type? el('span',{class:'tag plain'},p.type):null, p.ageLabel? el('span',{class:'tag age-all'},p.ageLabel):null, el('span',{class:'tag plain'},'ohne Anmeldung'), el('span',{class:'tag plain'},'kostenlos')),
+        el('div',{class:'tags'}, p.type? el('span',{class:'tag plain'},p.type):null, p.ageLabel? el('span',{class:'tag age-all'},p.ageLabel):null, el('span',{class:'tag plain'},'ohne Anmeldung'), el('span',{class:'tag plain'}, p.cost || 'kostenlos')),
         el('a',{href:p.url,target:'_blank',rel:'noopener',style:'font-size:13px'},'Zur Seite der Einrichtung ↗')));
     }
   }

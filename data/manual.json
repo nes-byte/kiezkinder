@@ -386,6 +386,15 @@
    "lat": 52.5329,
    "lng": 13.4042,
    "url": "https://stz-prenzlauerberg.pfefferwerk.de/serien/indoorspielplatz/"
+  },
+  "psb": {
+   "name": "Philipp-Schaeffer-Bibliothek",
+   "type": "Bibliothek",
+   "address": "Brunnenstr. 181, 10119 Berlin",
+   "kiez": "mitte",
+   "lat": 52.5316,
+   "lng": 13.3999,
+   "url": "https://www.berlin.de/land/kalender/index.php?c=327&v_ort=38489"
   }
  },
  "plans": [
@@ -1326,6 +1335,21 @@
    "cost": "kostenlos, Spende willkommen",
    "highlight": false,
    "url": "https://stz-prenzlauerberg.pfefferwerk.de/serien/indoorspielplatz/"
+  },
+  {
+   "date": "2026-11-21",
+   "start": "12:00",
+   "end": "13:00",
+   "title": "Familienkonzert: Das Rolfsrudel",
+   "place": "psb",
+   "ageMin": 24,
+   "ageMax": null,
+   "ageLabel": "ab 2 Jahren",
+   "note": "Handgemachte Musik zum Mitsingen und Mittanzen in der Kinderbibliothek.",
+   "signup": "",
+   "cost": "",
+   "highlight": true,
+   "url": "https://www.berlin.de/land/kalender/index.php?detail=295847&c=327"
   }
  ]
 }

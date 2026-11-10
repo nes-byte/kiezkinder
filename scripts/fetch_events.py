@@ -27,10 +27,11 @@ MAX_AGE_MONTHS = 72          # Angebote, die erst ab 7 Jahren starten, fliegen r
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "data" / "events.json"
 
-LIBRARIES = {  # berlin.de Orts-ID -> Ort-ID in data/manual.json
-    "37541": "wt",   # Bibliothek am Wasserturm
-    "45133": "kt",   # Kurt-Tucholsky-Bibliothek
-    "41678": "hb",   # Heinrich-Böll-Bibliothek
+LIBRARIES = {  # berlin.de Orts-ID -> (Kalender-ID, Index des Felds "Kinder, Jugendliche", Ort-ID in data/manual.json)
+    "37541": ("409", 8, "wt"),    # Bibliothek am Wasserturm (Stadtbibliothek Pankow)
+    "45133": ("409", 8, "kt"),    # Kurt-Tucholsky-Bibliothek (Stadtbibliothek Pankow)
+    "41678": ("409", 8, "hb"),    # Heinrich-Böll-Bibliothek (Stadtbibliothek Pankow)
+    "38489": ("327", 7, "psb"),   # Philipp-Schaeffer-Bibliothek (Stadtbibliothek Mitte)
 }
 
 session = requests.Session()
@@ -187,14 +188,16 @@ def keep(lo, hi):
 
 # ---------- Bibliotheken (berlin.de) ----------
 
+SCHOOL = re.compile(r"Hausaufgaben|Nachhilfe|\bKlasse\b|Jugendliche ab|Teens?\b", re.I)
+
 def fetch_libraries(start, stop):
     events = []
-    for ort, place in LIBRARIES.items():
+    for ort, (cal, kat, place) in LIBRARIES.items():
         print(f"Bibliothek {place} ({ort})")
         for ls in range(0, 300, 10):
-            url = ("https://www.berlin.de/land/kalender/index.php?suchmaske&c=409"
+            url = (f"https://www.berlin.de/land/kalender/index.php?suchmaske&c={cal}"
                    f"&date_start={start:%d.%m.%Y}&date_stop={stop:%d.%m.%Y}"
-                   f"&kategorie%5B8%5D=3&v_ort={ort}&ls={ls}")
+                   f"&kategorie%5B{kat}%5D=3&v_ort={ort}&ls={ls}")
             html = get(url)
             if not html:
                 break
@@ -210,6 +213,8 @@ def fetch_libraries(start, stop):
                 detail = urljoin(url, a["href"])
                 detail = re.sub(r"&ls=\d+", "", detail)
                 title = " ".join(a.get_text(" ").split())
+                if SCHOOL.search(title):
+                    continue  # Schulkinder-Angebote
                 desc = ""
                 try:
                     dhtml = get(detail)
@@ -315,7 +320,7 @@ AREA_PLZ = {
     "10115", "10119", "10178", "10179",                     # Mitte, nah dran
     "10243", "10245", "10247", "10249",                     # Friedrichshain
 }
-OWN_VENUES = re.compile(r"Familienzentrum Wei(ß|ss)ensee|Wasserturm|Tucholsky|Heinrich-B[öo]ll-Bibliothek|Kreativhaus|Fischerinsel|Menschenskinder|Mamunette|Ludothek", re.I)
+OWN_VENUES = re.compile(r"Familienzentrum Wei(ß|ss)ensee|Philipp-Schaeffer|Wasserturm|Tucholsky|Heinrich-B[öo]ll-Bibliothek|Kreativhaus|Fischerinsel|Menschenskinder|Mamunette|Ludothek", re.I)
 BMK_HIGHLIGHT = {"Fest", "Flohmarkt"}
 VENUES = ROOT / "data" / "venues.json"
 _venues = json.loads(VENUES.read_text(encoding="utf-8")) if VENUES.exists() else {}

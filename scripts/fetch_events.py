@@ -21,7 +21,7 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-USER_AGENT = "KiezkinderKalender/1.0 (privater Wochenkalender fuer eine Kita-Elterngruppe; github.com)"
+USER_AGENT = "Playces/1.0 (privater Wochenkalender fuer eine Kita-Elterngruppe; github.com)"
 DAYS_AHEAD = 24
 MAX_AGE_MONTHS = 72          # Angebote, die erst ab 7 Jahren starten, fliegen raus
 ROOT = Path(__file__).resolve().parent.parent

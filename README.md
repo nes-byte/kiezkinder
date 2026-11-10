@@ -1,6 +1,6 @@
-# Kiezkinder Kalender
+# Playces
 
-Wochenübersicht mit Terminen für Kinder von 0 bis 6 Jahren in Prenzlauer Berg, Mitte und Friedrichshain.
+Orte und Termine für Kinder von 0 bis 6 Jahren außerhalb der Kita, in Prenzlauer Berg, Mitte, Friedrichshain und Weißensee.
 
 - **Seite für die Eltern:** `index.html`
 - **Pflege-Seite (nur für dich):** `admin.html`. Dort trägst du Wochenpläne, Einzeltermine und Orte mit Öffnungszeiten ein.

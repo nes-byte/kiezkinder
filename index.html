@@ -83,7 +83,7 @@ button{font:inherit;color:inherit}
 .legend{display:flex;flex-wrap:wrap;gap:4px 12px;color:var(--muted)}
 .lg{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .lg i{width:10px;height:10px;border-radius:50%;display:inline-block}
-.leaflet-tile-pane{filter:sepia(.18) saturate(.85) brightness(1.02)}
+.leaflet-tile-pane{filter:grayscale(.55) sepia(.22) brightness(1.04) contrast(.92)}
 .leaflet-container{font-family:var(--f-body)}
 .mk{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;font:800 13px var(--f-body);color:var(--chip-ink);
   box-shadow:0 0 0 3px var(--surface);transition:transform .15s}
@@ -542,15 +542,17 @@ footer strong{color:var(--ink)}
     if (map || !window.L) return;
     map = L.map('map', { zoomControl:false, scrollWheelZoom:true, attributionControl:true }).setView([52.532, 13.425], 13);
     L.control.zoom({ position:'bottomright' }).addTo(map);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19, subdomains:'abcd',
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
     layer = L.layerGroup().addTo(map);
   }
   function renderMap(){
     const counts = countByPlace();
-    const ids = Object.keys(P).filter(id => P[id].lat && P[id].lng && kiezMatchPlace(id) && counts[id] > 0);
+    // Auf die Karte: Orte mit Terminen in der Auswahl und Orte, die diese Woche einfach offen sind
+    const openThisWeek = id => openCatOk() && ageMatch(P[id]) && weekDates().some(ds => openOn(id, ds));
+    const ids = Object.keys(P).filter(id => P[id].lat && P[id].lng && kiezMatchPlace(id) && (counts[id] > 0 || (openIds().includes(id) && openThisWeek(id))));
     // Legende
     const lg = document.getElementById('legend'); lg.replaceChildren();
     const used = new Set(ids.map(id => kindOf(id)[0]));
@@ -561,7 +563,7 @@ footer strong{color:var(--ink)}
     for (const id of ids){
       const p = P[id], k = kindOf(id), sel = id===state.place;
       const icon = L.divIcon({ className:'', iconSize:[34,34], iconAnchor:[17,17],
-        html:'<span class="mk'+(pureOpen(id)?' sq':'')+(sel?' sel':'')+'" style="background:'+k[3]+'">'+counts[id]+'</span>' });
+        html:'<span class="mk'+(pureOpen(id)?' sq':'')+(sel?' sel':'')+'" style="background:'+k[3]+'">'+(counts[id] || '')+'</span>' });
       const m = L.marker([p.lat, p.lng], { icon, title:p.name, keyboard:true, riseOnHover:true }).addTo(layer);
       m.bindTooltip(p.name, { direction:'top', offset:[0,-16] });
       m.on('click', () => pickPlace(id, true));

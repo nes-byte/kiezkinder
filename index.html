@@ -9,177 +9,126 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Figtree:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-/* Layout: split screen like a search page. Sticky top bar with logo, week switch and filter pills;
-   left column scrolls the list (highlights, open places, week), right column holds a sticky map.
-   Style guide "Playces" (styleguide.html): white ground, pastel brand colours only as fills with dark text, small radii,
-   shadows only where something floats, short press feedback on everything clickable. WCAG AA checked. */
+/* Layout: one calm column on warm paper. Logo in cut-paper letters, a band of pastel loops behind the header,
+   then filters, highlights, open places and the week list. No borders or drop shadows; colour carries age, kiez and state. */
 :root{
-  /* Markenfarben (Styleguide Playces) */
-  --pfirsich:#FFB592; --vanille:#FFEFCA; --himmel:#C3E1FF; --creme:#FAF7F1;
-  --rosa:#F8D4E5; --salbei:#B2CEAF;
-  /* Textfarben, aus den Markenfarben abgedunkelt (>= 4.5:1 auf Weiß und Creme) */
-  --pfirsich-text:#B4501E; --himmel-text:#2D69A6; --rosa-text:#AE3A6F; --salbei-text:#4D774A; --vanille-text:#8A6A12;
-  /* Neutrale */
-  --paper:#FFFFFF; --paper-soft:var(--creme); --line:#ECE6DC; --ink:#1F1A17; --muted:#6F6862;
-  /* Kurznamen fürs Skript (Arten von Orten, Altersschilder) */
-  --bg:var(--paper); --surface:var(--paper); --sunken:var(--paper-soft); --accent:var(--himmel-text); --chip-ink:var(--ink);
-  --sky:var(--himmel); --peach:var(--pfirsich); --mint:var(--salbei); --lilac:var(--rosa);
-  --sun:var(--vanille); --pink:var(--rosa); --teal:var(--salbei); --orange:var(--pfirsich);
-  --map-land:#F1F1EF;
-  /* Shape and motion */
-  --r-sm:4px; --r-md:8px; --r:8px;
-  --shadow-float:0 1px 2px rgba(13,2,2,.06),0 4px 12px rgba(13,2,2,.08);
-  --ease:cubic-bezier(.2,.7,.3,1); --t:.12s;
+  --bg:#FFFFFF;          /* white */
+  --surface:#FBF7F0;     /* lighter paper for cards */
+  --sunken:#EDE3D3;      /* tracks, empty states */
+  --ink:#3B2B27;         /* warm near-black brown */
+  --muted:#7C6B62;
+  --line:#E3D7C4;
+  --accent:#4E6A78;      /* slate blue: actions and selection */
+  --chip-ink:#2E221E;    /* text on pastel fills, both themes */
+  /* palette from the reference images */
+  --peach:#EDB9A4; --orange:#E2733A; --sky:#A9BBDC; --maroon:#6E2A2C; --slate:#56707C;
+  --pink:#EAA7B8; --brown:#A06B3B; --sun:#EDCB82; --magenta:#C9497F; --mint:#AFCBB0;
+  --lilac:#D7B9CD; --teal:#8FB0B2; --rose:#F0C3B6;
+  --map-land:#ECE2D1; --map-street:#FBF7F0; --map-park:#CFE0CC; --map-water:#C9D6EC;
   --f-display:"Baloo 2", "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
   --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
-  color-scheme:light;
+  --r:18px; color-scheme:light;
 }
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:calc(48px + env(safe-area-inset-bottom,0px))}
 [hidden]{display:none!important}
-a{color:var(--himmel-text)}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+a{color:var(--accent)}
 button{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--himmel-text);outline-offset:2px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
 
-/* Micro-interactions: hover darkens slightly, press sinks 1px */
-button,summary,.suggest,.hl,a.tag{transition:background-color var(--t) var(--ease),color var(--t) var(--ease),border-color var(--t) var(--ease),transform var(--t) var(--ease),box-shadow var(--t) var(--ease)}
-button:active,summary:active,.suggest:active,a.hl:active{transform:translateY(1px) scale(.98)}
-
-/* Top bar */
-.topbar{position:sticky;top:0;z-index:1000;background:var(--paper);
-  padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));
-  display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;border-bottom:1px solid var(--line)}
-.logo{font-family:var(--f-display);font-weight:800;font-size:34px;line-height:1;margin:0 8px 0 0;display:flex;letter-spacing:.01em}
+/* Header with loops */
+header{position:relative;display:flex;flex-direction:column;gap:10px;padding-top:120px;isolation:isolate}
+.loops{position:absolute;top:0;left:50%;transform:translateX(-50%);width:100vw;max-width:1100px;height:150px;z-index:-1;overflow:hidden}
+.loops svg{width:100%;height:100%;display:block}
+.loops path{fill:none;stroke-width:14;stroke-linecap:round;opacity:.85}
+.logo{font-family:var(--f-display);font-weight:800;font-size:clamp(52px,14vw,84px);line-height:.9;margin:0;letter-spacing:.01em;display:flex}
 .logo span{display:inline-block}
-.logo span:nth-child(1),.logo span:nth-child(6){color:var(--pfirsich-text)}
-.logo span:nth-child(2),.logo span:nth-child(7){color:var(--himmel-text)}
-.logo span:nth-child(3){color:var(--vanille-text)}
-.logo span:nth-child(4){color:var(--rosa-text)}
-.logo span:nth-child(5){color:var(--salbei-text)}
-.logo span:nth-child(3n){transform:rotate(-3deg)}
-.filters{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;flex:1 1 auto;min-width:0;padding:3px}
-.filters::-webkit-scrollbar{display:none}
-.seg{display:inline-flex;background:var(--paper-soft);border:1px solid var(--line);border-radius:var(--r-md);padding:3px;gap:2px;flex:none}
-.seg button{border:0;background:transparent;border-radius:var(--r-sm);padding:6px 12px;font-weight:600;cursor:pointer;font-size:14px;color:var(--muted);white-space:nowrap}
-.seg button:hover{color:var(--ink)}
-.seg button[aria-pressed="true"]{background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgba(13,2,2,.10)}
-.fpill{position:relative;flex:none}
-.fpill summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:7px 12px;font-weight:600;font-size:14px;white-space:nowrap}
-.fpill summary:hover{border-color:var(--muted)}
-.fpill summary::-webkit-details-marker{display:none}
-.fpill summary::after{content:"";width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin:-3px 0 0 2px;opacity:.7;transition:transform var(--t) var(--ease)}
-.fpill[open] summary::after{transform:rotate(-135deg);margin:3px 0 0 2px}
-.fpill.on summary{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-.fpill[open] summary{border-color:var(--ink)}
-.panel{position:fixed;z-index:1100;margin-top:6px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:6px;min-width:220px;
-  display:flex;flex-direction:column;gap:2px;box-shadow:var(--shadow-float);animation:pop .14s var(--ease)}
-@keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-.opt{border:0;background:transparent;text-align:left;padding:8px 10px;border-radius:var(--r-sm);cursor:pointer;font-size:15px;display:flex;align-items:center;gap:10px}
-.opt:hover{background:var(--paper-soft)}
-.opt::before{content:"";width:12px;height:12px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--muted);flex:none;transition:background-color var(--t) var(--ease)}
-.opt[aria-pressed="true"]{font-weight:700}
-.opt[aria-pressed="true"]::before{background:var(--dot,var(--ink));box-shadow:inset 0 0 0 1.5px var(--ink)}
-.fchip{flex:none;border:1px solid var(--line);background:var(--paper);border-radius:var(--r-md);padding:7px 12px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
-.fchip:hover{border-color:var(--muted)}
-.fchip[aria-pressed="true"]{background:var(--salbei);border-color:var(--salbei);color:var(--ink)}
+.logo span:nth-child(1){color:var(--orange)} .logo span:nth-child(2){color:var(--slate)} .logo span:nth-child(3){color:var(--pink)}
+.logo span:nth-child(4){color:var(--brown)} .logo span:nth-child(5){color:var(--teal)} .logo span:nth-child(6){color:var(--magenta)}
+.logo span:nth-child(7){color:var(--sun)}
+.logo span:nth-child(odd){transform:translateY(2px)} .logo span:nth-child(3n){transform:rotate(-3deg)}
+.sub{color:var(--muted);max-width:56ch;margin:0;text-wrap:pretty}
 
-/* Split layout */
-.layout{display:block}
-.listcol{padding:24px max(16px,env(safe-area-inset-right,0px)) calc(96px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
-  display:flex;flex-direction:column;gap:32px;min-width:0}
-.mapcol{display:none}
-#map{width:100%;height:100%;background:var(--map-land)}
-.mapmeta{position:absolute;left:12px;top:12px;z-index:500;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:8px 12px;font-size:13px;display:flex;flex-direction:column;gap:6px;max-width:calc(100% - 24px)}
-.mapmeta b{font-size:14px}
-.legend{display:flex;flex-wrap:wrap;gap:4px 12px;color:var(--ink)}
-.lg{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
-.lg i{width:10px;height:10px;border-radius:50%;display:inline-block;box-shadow:inset 0 0 0 1px rgba(13,2,2,.25)}
-.leaflet-tile-pane{filter:grayscale(.85) brightness(1.06) contrast(.9)}
-.leaflet-container{font-family:var(--f-body)}
-.leaflet-bar a{border-radius:0!important}
-.leaflet-bar{border-radius:var(--r-sm)!important;overflow:hidden}
-.mk{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;font:800 13px var(--f-body);color:var(--ink);
-  box-shadow:0 0 0 2px var(--paper),0 0 0 3px rgba(13,2,2,.35);transition:transform .15s var(--ease)}
-.mk.sq{border-radius:var(--r-sm)}
-.hot .mk,.mk.sel{transform:scale(1.25);box-shadow:0 0 0 2px var(--paper),0 0 0 4px var(--ink)}
-.viewtoggle{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:1050;
-  border:0;background:var(--ink);color:var(--paper);border-radius:var(--r-md);padding:12px 20px;font-weight:700;font-size:15px;cursor:pointer;box-shadow:var(--shadow-float)}
-.viewtoggle:active{transform:translateX(-50%) translateY(1px) scale(.98)}
-/* Phone: map view */
-body.show-map .listcol{display:none}
-body.show-map .mapcol{display:block;position:fixed;left:0;right:0;bottom:0;top:var(--topbar-h,120px)}
-/* Desktop: list left, sticky map right */
-@media (min-width:960px){
-  .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(380px,44vw)}
-  .listcol{padding-bottom:48px;max-width:760px;width:100%;justify-self:end}
-  .mapcol{display:block;position:sticky;top:var(--topbar-h,72px);height:calc(100vh - var(--topbar-h,72px));padding:12px 12px 12px 0}
-  .mapcol .mapbox{position:relative;height:100%;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--line)}
-  .viewtoggle{display:none}
-  body.show-map .listcol{display:flex}
-  body.show-map .mapcol{position:sticky}
-}
-.mapbox{position:relative;height:100%}
-
-/* Intro */
-.intro{display:flex;flex-direction:column;gap:6px;padding-top:8px}
-.intro h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,4vw,36px);line-height:1.1;margin:0;text-wrap:balance}
-.sub{color:var(--muted);max-width:60ch;margin:0;text-wrap:pretty}
+/* Filters */
+.controls{display:flex;flex-direction:column;gap:14px}
+.filtergroup{display:flex;flex-direction:column;gap:6px}
+.flabel{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.seg{display:inline-flex;background:var(--sunken);border-radius:999px;padding:4px;gap:2px;align-self:flex-start}
+.seg button{border:0;background:transparent;border-radius:999px;padding:8px 16px;font-weight:600;cursor:pointer;font-size:15px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:0;background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px;cursor:pointer;color:var(--ink);transition:background-color .15s}
+.chip:hover{background:var(--sunken)}
+.chip[aria-pressed="true"]{color:var(--chip-ink)}
+.chip[data-age="all"][aria-pressed="true"],.chip[data-kiez="all"][aria-pressed="true"],.bchip[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+.chip[data-age="baby"][aria-pressed="true"]{background:var(--mint)}
+.chip[data-age="klein"][aria-pressed="true"]{background:var(--sun)}
+.chip[data-age="kita"][aria-pressed="true"]{background:var(--pink)}
+.chip[data-kiez="pb"][aria-pressed="true"]{background:var(--sky)}
+.chip[data-kiez="mitte"][aria-pressed="true"]{background:var(--peach)}
+.chip[data-kiez="fhain"][aria-pressed="true"]{background:var(--lilac)}
+.chip[data-kiez="weissensee"][aria-pressed="true"]{background:var(--teal)}
+.bchip,.kchip,.fchip{font-size:13.5px;padding:6px 13px}
+.fchip{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line)}
+.fchip[aria-pressed="true"]{background:var(--mint);box-shadow:none}
 
 /* Sections */
 .sectionhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
-h2{font-family:var(--f-display);font-weight:700;font-size:26px;line-height:1.1;margin:0;color:var(--ink)}
+h2{font-family:var(--f-display);font-weight:700;font-size:28px;line-height:1.1;margin:0;color:var(--ink)}
 .count{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
-.empty{color:var(--muted);background:var(--paper-soft);border-radius:var(--r-md);padding:16px}
-.loading{color:var(--muted);padding:16px;background:var(--paper-soft);border-radius:var(--r-md)}
+.empty{color:var(--muted);background:var(--sunken);border-radius:var(--r);padding:16px}
+.loading{color:var(--muted);padding:16px;background:var(--sunken);border-radius:var(--r)}
 
 /* Highlights */
 .hl-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,78%);gap:12px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x mandatory;scrollbar-width:thin}
 @media (min-width:640px){.hl-row{grid-auto-columns:calc(50% - 6px)}}
-.hl{scroll-snap-align:start;background:var(--pfirsich);color:var(--ink);border-radius:var(--r-md);padding:18px;display:flex;flex-direction:column;gap:6px;min-width:0;text-decoration:none}
-.hl:nth-child(4n+2){background:var(--himmel)} .hl:nth-child(4n+3){background:var(--rosa)} .hl:nth-child(4n+4){background:var(--salbei)}
-a.hl:hover{box-shadow:inset 0 0 0 2px var(--ink)}
-.hl .when{font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.hl{scroll-snap-align:start;background:var(--sun);color:var(--chip-ink);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:6px;min-width:0;text-decoration:none}
+.hl:nth-child(4n+2){background:var(--peach)} .hl:nth-child(4n+3){background:var(--mint)} .hl:nth-child(4n+4){background:var(--sky)}
+.hl .when{font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
 .hl h3{font-family:var(--f-display);font-weight:700;font-size:22px;line-height:1.1;margin:0;text-wrap:balance}
 .hl .where{font-size:14px}
-.hl .tag,.hl .tag.plain{background:transparent;box-shadow:inset 0 0 0 1px var(--ink);color:var(--ink)}
+.hl .tag.plain{box-shadow:inset 0 0 0 1.5px rgba(46,34,30,.25);color:var(--chip-ink)}
 
 /* Open places */
 .openlist{display:flex;flex-direction:column;gap:8px}
-.op{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;display:block;transition:border-color var(--t) var(--ease)}
-.op:hover,.op[open]{border-color:var(--muted)}
+.op{background:var(--surface);border-radius:22px;padding:14px 18px;display:block}
 .op > :not(summary){margin-top:10px}
 .op-top{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;list-style:none}
 .op-top::-webkit-details-marker{display:none}
 .op-head{min-width:0;flex:1;display:flex;flex-direction:column;gap:6px}
 .op-meta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
-.op-meta .status{font-size:12.5px;padding:2px 8px}
-.op-top::after{content:"";width:8px;height:8px;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:rotate(45deg);margin:0 4px 4px 0;flex:none;transition:transform .15s var(--ease)}
+.op-meta .status{font-size:12.5px;padding:3px 10px}
+.op-top::after{content:"";width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:0 4px 4px 0;flex:none;transition:transform .15s}
 details.op[open] .op-top::after{transform:rotate(-135deg);margin:4px 4px 0 0}
 .op h3{font-family:var(--f-display);font-weight:700;font-size:20px;margin:0;line-height:1.15}
 .op .addr{font-size:14px;color:var(--muted)}
-.status{font-weight:700;font-size:13.5px;border-radius:var(--r-sm);padding:4px 10px;white-space:nowrap}
-.status.on{background:var(--salbei);color:var(--ink)}
-.status.off{background:var(--paper-soft);color:var(--muted)}
-.hours{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
-.hd{border-radius:var(--r-sm);padding:6px 2px;text-align:center;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line);font-size:12px;font-variant-numeric:tabular-nums;line-height:1.25;color:var(--muted);white-space:pre-line}
+.status{font-weight:700;font-size:13.5px;border-radius:999px;padding:5px 12px;white-space:nowrap}
+.status.on{background:var(--mint);color:var(--chip-ink)}
+.status.off{background:var(--sunken);color:var(--muted)}
+.hours{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.hd{border-radius:12px;padding:6px 2px;text-align:center;background:var(--bg);font-size:12px;font-variant-numeric:tabular-nums;line-height:1.25;color:var(--muted);white-space:pre-line}
 .hd b{display:block;font-size:13px;color:var(--ink)}
-.hd.has{background:var(--paper-soft);box-shadow:none;color:var(--ink)}
-.hd.now{background:var(--himmel);box-shadow:none;color:var(--ink)} .hd.now b{color:var(--ink)}
-.openline{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-size:14px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 14px}
+.hd.has{background:var(--sunken);color:var(--ink)}
+.hd.now{background:var(--sky);color:var(--chip-ink)} .hd.now b{color:var(--chip-ink)}
+.openline{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-size:14px;background:var(--sunken);border-radius:14px;padding:10px 14px}
 .openline .lab{font-weight:700}
 
 /* Week list */
+.tabs{display:inline-flex;background:var(--sunken);border-radius:999px;padding:4px;gap:2px}
+.tab{border:0;background:transparent;border-radius:999px;padding:7px 16px;font-weight:600;cursor:pointer;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink)}
 .day{display:flex;flex-direction:column;gap:8px}
-.dayhead{position:sticky;top:var(--topbar-h,0px);z-index:2;background:var(--paper);padding:10px 0 4px;display:flex;align-items:baseline;gap:10px}
+.dayhead{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--bg);padding:10px 0 4px;display:flex;align-items:baseline;gap:10px}
 .dayhead .dname{font-family:var(--f-display);font-weight:700;font-size:22px}
 .dayhead .ddate{color:var(--muted);font-variant-numeric:tabular-nums}
-.dayhead .today{background:var(--pfirsich);color:var(--ink);font-size:11.5px;font-weight:700;border-radius:var(--r-sm);padding:2px 8px;text-transform:uppercase;letter-spacing:.06em}
-.ev{display:grid;grid-template-columns:58px 1fr;gap:12px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;transition:border-color var(--t) var(--ease)}
-.ev:hover{border-color:var(--muted)}
+.dayhead .today{background:var(--orange);color:#fff;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;text-transform:uppercase;letter-spacing:.06em}
+.ev{display:grid;grid-template-columns:58px 1fr;gap:12px;background:var(--surface);border-radius:var(--r);padding:14px 16px}
 .ev .time{font-weight:700;font-variant-numeric:tabular-nums;font-size:15px;line-height:1.25}
 .ev .time small{display:block;font-weight:500;color:var(--muted)}
 .ev .body{min-width:0;display:flex;flex-direction:column;gap:5px}
@@ -188,114 +137,143 @@ details.op[open] .op-top::after{transform:rotate(-135deg);margin:4px 4px 0 0}
 .ev .place{font-size:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .ev .place .venue{color:var(--muted)}
 .ev .src{font-size:13px}
-.ev.star{box-shadow:inset 4px 0 0 var(--pfirsich)}
-.linkbtn{border:0;background:none;padding:0;color:var(--himmel-text);font-weight:600;cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
-.linkbtn:hover{text-decoration-thickness:2px}
+.ev.star{background:linear-gradient(90deg,var(--sun) 0 5px,var(--surface) 5px)}
+.linkbtn{border:0;background:none;padding:0;color:var(--accent);font-weight:600;cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
-.tag{font-size:12.5px;font-weight:700;border-radius:var(--r-sm);padding:2px 8px;color:var(--ink);background:var(--paper-soft)}
-.tag.age-baby{background:var(--salbei)} .tag.age-klein{background:var(--vanille)} .tag.age-kita{background:var(--rosa)} .tag.age-gross{background:var(--himmel)} .tag.age-all{background:var(--paper-soft);color:var(--ink)}
-.tag.plain{background:transparent;box-shadow:inset 0 0 0 1px var(--line);color:var(--muted)}
-.tag.warn{background:transparent;box-shadow:inset 0 0 0 1px var(--pfirsich);color:var(--pfirsich-text)}
-.filternote{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--himmel);color:var(--ink);border-radius:var(--r-md);padding:10px 14px;font-size:14px}
-.filternote button{border:0;background:var(--paper);color:var(--ink);border-radius:var(--r-sm);padding:4px 10px;font-weight:700;cursor:pointer}
+.tag{font-size:12.5px;font-weight:700;border-radius:999px;padding:2px 10px;color:var(--chip-ink);background:var(--sunken)}
+.tag.age-baby{background:var(--mint)} .tag.age-klein{background:var(--sun)} .tag.age-kita{background:var(--pink)} .tag.age-gross{background:var(--sky)} .tag.age-all{background:var(--sunken);color:var(--ink)}
+.tag.plain{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--muted)}
+.tag.warn{background:transparent;box-shadow:inset 0 0 0 1.5px var(--peach);color:var(--muted)}
+.filternote{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--sky);color:var(--chip-ink);border-radius:14px;padding:10px 14px;font-size:14px}
+.filternote button{border:0;background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 12px;font-weight:700;cursor:pointer}
+
+/* Map */
+.mapcard{background:var(--surface);border-radius:24px;padding:12px}
+.mapcard svg{width:100%;height:auto;display:block;border-radius:16px;max-height:70vh}
+.map-land{fill:var(--map-land)} .map-park{fill:var(--map-park)}
+.map-water{stroke:var(--map-water);stroke-width:12;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.map-street{stroke:var(--map-street);stroke-width:6;fill:none;stroke-linecap:round}
+.map-label{fill:var(--muted);font:600 10px var(--f-body);letter-spacing:.04em}
+.pin{cursor:pointer}
+.pin .dot{stroke:var(--surface);stroke-width:2.5}
+.pin text{font:800 12px var(--f-body);fill:var(--chip-ink);pointer-events:none}
+.pin:hover .dot,.pin:focus .dot{stroke:var(--ink)}
+.legend{display:flex;flex-direction:column;margin-top:8px}
+.legend button{display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:transparent;padding:12px 4px;cursor:pointer}
+.legend button:first-child{border-top:0}
+.legend .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;color:var(--chip-ink)}
+.legend .n.sq{border-radius:8px}
+.legend .lname{font-weight:700;display:block}
+.legend .laddr{font-size:13px;color:var(--muted)}
+.legend .lcount{font-size:13px;font-weight:700;color:var(--accent)}
 
 /* Suggest + footer */
-.suggest{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--vanille);border-radius:var(--r-md);padding:18px;color:var(--ink);text-decoration:none;font-size:15px}
-.suggest-btn{background:var(--ink);color:var(--paper);border-radius:var(--r-sm);padding:9px 14px;font-weight:700;white-space:nowrap;transition:background-color var(--t) var(--ease)}
-.suggest:hover .suggest-btn{background:var(--himmel-text)}
+.suggest{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--lilac);border-radius:22px;padding:18px;color:var(--chip-ink);text-decoration:none;font-size:15px}
+.suggest-btn{background:var(--chip-ink);color:var(--surface);border-radius:999px;padding:9px 16px;font-weight:700;white-space:nowrap}
+.suggest:hover .suggest-btn{background:var(--maroon)}
 footer{border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:14px;display:flex;flex-direction:column;gap:8px}
 footer p{margin:0}
 footer strong{color:var(--ink)}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}button:active,summary:active,.suggest:active,a.hl:active{transform:none}}
-
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
-<header class="topbar" id="topbar">
-  <h1 class="logo" aria-label="Playces"><span>P</span><span>l</span><span>a</span><span>y</span><span>c</span><span>e</span><span>s</span></h1>
-  <div class="filters" role="toolbar" aria-label="Filter">
+<div class="wrap">
+  <header>
+    <div class="loops" aria-hidden="true">
+      <svg viewBox="0 0 1100 150" preserveAspectRatio="xMidYMid slice">
+        <path d="M-20 40 C 60 -10, 140 90, 210 40 S 330 -20, 380 50 S 470 140, 540 90" stroke="var(--sky)"/>
+        <path d="M120 150 C 150 90, 230 70, 260 110 S 250 170, 300 150 S 380 60, 450 75" stroke="var(--mint)"/>
+        <path d="M500 -10 C 520 60, 600 80, 640 40 S 700 -10, 740 30 S 760 120, 840 110" stroke="var(--peach)"/>
+        <path d="M680 160 C 720 110, 800 140, 830 90 S 900 20, 960 60 S 1040 140, 1120 90" stroke="var(--lilac)"/>
+        <path d="M880 -10 C 900 40, 980 50, 1000 20 S 1060 -10, 1120 30" stroke="var(--sun)"/>
+        <path d="M-20 120 C 30 100, 70 150, 110 130" stroke="var(--pink)"/>
+      </svg>
+    </div>
+    <h1 class="logo" aria-label="Playces"><span>P</span><span>l</span><span>a</span><span>y</span><span>c</span><span>e</span><span>s</span></h1>
+    <p class="sub">Orte und Termine für Kinder von 0 bis 6, außerhalb der Kita: Familienzentren, Bibliotheken, Cafés und mehr in Prenzlauer Berg, Mitte, Friedrichshain und Weißensee. <span id="stand"></span></p>
+  </header>
+
+  <div class="controls">
     <div class="seg" role="group" aria-label="Woche wählen">
       <button id="wk-this" type="button" aria-pressed="true">Diese Woche</button>
       <button id="wk-next" type="button" aria-pressed="false">Nächste Woche</button>
     </div>
-    <details class="fpill" id="f-age"><summary><span id="f-age-v">Alle Alter</span></summary>
-      <div class="panel" role="group" aria-label="Alter">
-        <button class="opt" type="button" data-age="all">Alle Alter</button>
-        <button class="opt" type="button" data-age="baby" style="--dot:var(--salbei)">Baby 0–1</button>
-        <button class="opt" type="button" data-age="klein" style="--dot:var(--vanille)">Kleinkind 1–3</button>
-        <button class="opt" type="button" data-age="kita" style="--dot:var(--rosa)">Kita 3–6</button>
-      </div></details>
-    <details class="fpill" id="f-kiez"><summary><span id="f-kiez-v">Alle Kieze</span></summary>
-      <div class="panel" role="group" aria-label="Kiez">
-        <button class="opt" type="button" data-kiez="all">Alle Kieze</button>
-        <button class="opt" type="button" data-kiez="pb">Prenzlauer Berg</button>
-        <button class="opt" type="button" data-kiez="mitte">Mitte</button>
-        <button class="opt" type="button" data-kiez="fhain">Friedrichshain</button>
-        <button class="opt" type="button" data-kiez="weissensee">Weißensee</button>
-      </div></details>
-    <details class="fpill" id="f-cat"><summary><span id="f-cat-v">Alle Bereiche</span></summary>
-      <div class="panel" role="group" aria-label="Bereich">
-        <button class="opt" type="button" data-cat="all">Alle Bereiche</button>
-        <button class="opt" type="button" data-cat="treff">Offene Treffs</button>
-        <button class="opt" type="button" data-cat="bewegung">Bewegung</button>
-        <button class="opt" type="button" data-cat="musik">Musik</button>
-        <button class="opt" type="button" data-cat="lesen">Bücher, Sprache &amp; Theater</button>
-        <button class="opt" type="button" data-cat="kreativ">Basteln</button>
-        <button class="opt" type="button" data-cat="besonders">Feste &amp; Besonderes</button>
-      </div></details>
-    <button class="fchip" type="button" id="free" aria-pressed="false">Ohne Anmeldung</button>
+    <div class="filtergroup"><span class="flabel">Alter</span>
+    <div class="chips" role="group" aria-label="Alter filtern">
+      <button class="chip" type="button" data-age="all" aria-pressed="true">Alle Alter</button>
+      <button class="chip" type="button" data-age="baby" aria-pressed="false">Baby 0–1</button>
+      <button class="chip" type="button" data-age="klein" aria-pressed="false">Kleinkind 1–3</button>
+      <button class="chip" type="button" data-age="kita" aria-pressed="false">Kita 3–6</button>
+    </div>
+    </div>
+    <div class="filtergroup"><span class="flabel">Kiez</span>
+    <div class="chips" role="group" aria-label="Kiez filtern">
+      <button class="chip kchip" type="button" data-kiez="all" aria-pressed="true">Alle Kieze</button>
+      <button class="chip kchip" type="button" data-kiez="pb" aria-pressed="false">Prenzlauer Berg</button>
+      <button class="chip kchip" type="button" data-kiez="mitte" aria-pressed="false">Mitte</button>
+      <button class="chip kchip" type="button" data-kiez="fhain" aria-pressed="false">Friedrichshain</button>
+      <button class="chip kchip" type="button" data-kiez="weissensee" aria-pressed="false">Weißensee</button>
+    </div>
+    </div>
+    <div class="filtergroup"><span class="flabel">Bereich</span>
+    <div class="chips" role="group" aria-label="Bereich filtern">
+      <button class="chip bchip" type="button" data-cat="all" aria-pressed="true">Alles</button>
+      <button class="chip bchip" type="button" data-cat="treff" aria-pressed="false">Offene Treffs</button>
+      <button class="chip bchip" type="button" data-cat="bewegung" aria-pressed="false">Bewegung</button>
+      <button class="chip bchip" type="button" data-cat="musik" aria-pressed="false">Musik</button>
+      <button class="chip bchip" type="button" data-cat="lesen" aria-pressed="false">Bücher, Sprache &amp; Theater</button>
+      <button class="chip bchip" type="button" data-cat="kreativ" aria-pressed="false">Basteln</button>
+      <button class="chip bchip" type="button" data-cat="besonders" aria-pressed="false">Feste &amp; Besonderes</button>
+      <button class="chip fchip" type="button" id="free" aria-pressed="false">Ohne Anmeldung</button>
+    </div>
+    </div>
   </div>
-</header>
 
-<div class="layout">
-  <main class="listcol">
-    <section class="intro">
-      <h1>Wohin heute mit den Kleinen?</h1>
-      <p class="sub">Orte und Termine für Kinder von 0 bis 6, außerhalb der Kita: Familienzentren, Bibliotheken, Cafés und mehr in Prenzlauer Berg, Mitte, Friedrichshain und Weißensee. <span id="stand"></span></p>
+  <div id="loading" class="loading">Termine werden geladen …</div>
+
+  <div id="app" hidden style="display:flex;flex-direction:column;gap:22px">
+    <section aria-labelledby="hl-title">
+      <div class="sectionhead"><h2 id="hl-title">Highlights</h2><span class="count" id="hl-count"></span></div>
+      <div class="hl-row" id="hl"></div>
     </section>
 
-    <div id="loading" class="loading">Termine werden geladen …</div>
+    <section aria-labelledby="open-title" style="display:flex;flex-direction:column;gap:12px" id="open-section">
+      <div class="sectionhead"><h2 id="open-title">Einfach hingehen</h2><span class="count">ohne Termin, zu den Öffnungszeiten</span></div>
+      <div id="openplaces" class="openlist"></div>
+    </section>
 
-    <div id="app" hidden style="display:flex;flex-direction:column;gap:28px">
-      <section aria-labelledby="hl-title">
-        <div class="sectionhead"><h2 id="hl-title">Highlights</h2><span class="count" id="hl-count"></span></div>
-        <div class="hl-row" id="hl"></div>
-      </section>
+    <section aria-labelledby="all-title" style="display:flex;flex-direction:column;gap:14px">
+      <div class="sectionhead">
+        <h2 id="all-title">Alle Termine</h2>
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" id="tab-list" aria-selected="true" type="button">Liste</button>
+          <button class="tab" role="tab" id="tab-map" aria-selected="false" type="button">Karte</button>
+        </div>
+      </div>
+      <div id="filternote" hidden class="filternote"><span id="filternote-text"></span><button type="button" id="clearplace">Alle Orte zeigen</button></div>
+      <div id="view-list" style="display:flex;flex-direction:column;gap:18px"></div>
+      <div id="view-map" hidden>
+        <div class="mapcard">
+          <svg id="map" viewBox="0 0 432 552" role="img" aria-label="Kiezkarte mit den Orten"></svg>
+          <div class="legend" id="legend"></div>
+        </div>
+      </div>
+    </section>
+  </div>
 
-      <section aria-labelledby="open-title" style="display:flex;flex-direction:column;gap:12px" id="open-section">
-        <div class="sectionhead"><h2 id="open-title">Einfach hingehen</h2><span class="count">ohne Termin, zu den Öffnungszeiten</span></div>
-        <div id="openplaces" class="openlist"></div>
-      </section>
+  <a id="suggest" class="suggest" hidden target="_blank" rel="noopener">
+    <span><b>Etwas entdeckt, das hier fehlt?</b><br>Schlag einen Termin vor. Er erscheint, sobald er geprüft ist.</span>
+    <span class="suggest-btn">Termin vorschlagen ↗</span>
+  </a>
 
-      <section aria-labelledby="all-title" style="display:flex;flex-direction:column;gap:14px">
-        <div class="sectionhead"><h2 id="all-title">Alle Termine</h2></div>
-        <div id="filternote" hidden class="filternote"><span id="filternote-text"></span><button type="button" id="clearplace">Alle Orte zeigen</button></div>
-        <div id="view-list" style="display:flex;flex-direction:column;gap:18px"></div>
-      </section>
-    </div>
-
-    <a id="suggest" class="suggest" hidden target="_blank" rel="noopener">
-      <span><b>Etwas entdeckt, das hier fehlt?</b><br>Schlag einen Termin vor. Er erscheint, sobald er geprüft ist.</span>
-      <span class="suggest-btn">Termin vorschlagen ↗</span>
-    </a>
-
-    <footer>
-      <p><strong>Ohne Gewähr.</strong> Termine ändern sich manchmal kurzfristig. Schau vor dem Losgehen kurz auf die Seite der Einrichtung, der Link steht bei jedem Termin.</p>
-      <p id="sources"></p>
-    </footer>
-  </main>
-
-  <aside class="mapcol" aria-label="Karte">
-    <div class="mapbox">
-      <div id="map"></div>
-      <div class="mapmeta"><b id="mapcount"></b><div class="legend" id="legend"></div></div>
-    </div>
-  </aside>
+  <footer>
+    <p><strong>Ohne Gewähr.</strong> Termine ändern sich manchmal kurzfristig. Schau vor dem Losgehen kurz auf die Seite der Einrichtung, der Link steht bei jedem Termin.</p>
+    <p id="sources"></p>
+    <p>Die Kartenpositionen sind ungefähr.</p>
+  </footer>
 </div>
 
-<button class="viewtoggle" id="viewtoggle" type="button">Karte zeigen</button>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 (function(){
   // Data lives in the repo: data/manual.json (by hand, via admin.html) and data/events.json (fetched by the GitHub Action).
@@ -418,11 +396,7 @@ footer strong{color:var(--ink)}
   }
   function dayLabel(ds){ const d = parse(ds); return { name: DAYS[d.getUTCDay()], date: d.getUTCDate()+'. '+MON[d.getUTCMonth()] }; }
   const placeName = id => (P[id] && P[id].name) || id;
-  function pickPlace(id, fromMap){
-    state.place = id; if (!fromMap) setView('list'); render();
-    const p = P[id]; if (map && p && p.lat) map.flyTo([p.lat, p.lng], Math.max(map.getZoom(), 15), {duration:.6});
-    const t = document.getElementById('all-title'); window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-topbarH()-8,behavior:'smooth'});
-  }
+  function pickPlace(id){ state.place = id; state.view='list'; render(); const t=document.getElementById('all-title'); window.scrollTo({top:t.getBoundingClientRect().top+window.scrollY-10,behavior:'smooth'}); }
 
   function renderHighlights(){
     const box = document.getElementById('hl'); box.replaceChildren();
@@ -431,7 +405,7 @@ footer strong{color:var(--ink)}
     if (!list.length){ box.append(el('div',{class:'empty'},'Für diese Auswahl gibt es keine besonderen Highlights. Unten stehen alle regelmäßigen Termine.')); return; }
     for (const e of list){
       const d = dayLabel(e.date);
-      box.append(el('a',{class:'hl','data-place':e.place,href:e.url || (P[e.place]||{}).url || '#',target:'_blank',rel:'noopener'},
+      box.append(el('a',{class:'hl',href:e.url || (P[e.place]||{}).url || '#',target:'_blank',rel:'noopener'},
         el('span',{class:'when'}, d.name+', '+d.date+(e.start?' · '+e.start:'')),
         el('h3',null,e.title),
         el('span',{class:'where'}, placeName(e.place)),
@@ -476,7 +450,7 @@ footer strong{color:var(--ink)}
           return el('div',{class:'hd'+(ws.length?' has':'')+(w===todayWd?' now':'')}, el('b',null,WD[w]), ws.length? windowsText(ws, true) : 'zu'); }));
       // Compact by default: name, type and status; tap to see hours and details
       const todayTxt = isClosedDay(id, today) ? 'heute zu' : (openOn(id, today) ? 'heute '+windowsText(openOn(id, today)) : 'heute zu');
-      box.append(el('details',{class:'op','data-place':id},
+      box.append(el('details',{class:'op'},
         el('summary',{class:'op-top'},
           el('div',{class:'op-head'}, el('h3',null,p.name),
             el('div',{class:'op-meta'}, status, el('span',{class:'addr'},(p.type ? p.type+' · ' : '')+todayTxt)))),
@@ -511,7 +485,7 @@ footer strong{color:var(--ink)}
           op.slice(3).forEach(id=> line.append(el('span',null,'· ', el('button',{type:'button',class:'linkbtn',onclick:()=>pickPlace(id)}, P[id].name), ' '+windowsText(openOn(id, ds))))); }}, '+ '+(op.length-3)+' weitere') : null));
       for (const e of (byDay[ds]||[])){
         const pl = P[e.place] || {};
-        day.append(el('article',{class:'ev'+(e.highlight?' star':''),'data-place':e.place},
+        day.append(el('article',{class:'ev'+(e.highlight?' star':'')},
           el('div',{class:'time'}, e.start || 'ganztags', e.end? el('small',null,'bis '+e.end):null),
           el('div',{class:'body'},
             el('h3',null,e.title),
@@ -532,121 +506,97 @@ footer strong{color:var(--ink)}
     }
   }
 
-
-  // ---------- Karte (Leaflet + OpenStreetMap/CARTO) ----------
+  // Hand-drawn map: equirectangular projection over Prenzlauer Berg, Mitte and Friedrichshain
+  const BOX = {w:432,h:552, lng0:13.398, lng1:13.458, lat0:52.506, lat1:52.552};
+  const X = lng => (lng-BOX.lng0)/(BOX.lng1-BOX.lng0)*BOX.w;
+  const Y = lat => BOX.h - (lat-BOX.lat0)/(BOX.lat1-BOX.lat0)*BOX.h;
+  const line = pts => 'M'+pts.map(p=>X(p[1]).toFixed(1)+' '+Y(p[0]).toFixed(1)).join(' L');
+  const NS='http://www.w3.org/2000/svg';
+  function s(tag, attrs, text){ const n=document.createElementNS(NS,tag); for(const k in attrs) n.setAttribute(k,attrs[k]); if(text) n.textContent=text; return n; }
+  // Places that only have opening hours (no events at all) count their open days; everything else counts events
   const pureOpen = id => openIds().includes(id) && !EVENTS.some(e => e.place === id);
   function countByPlace(){ const c={}; EVENTS.filter(e=>inWeek(e)&&ageMatch(e)&&catMatch(e)&&freeMatch(e)&&kiezMatch(e)).forEach(e=>c[e.place]=(c[e.place]||0)+1);
     for (const id of openIds()) if (pureOpen(id)) c[id] = ageMatch(P[id]) && openCatOk() ? weekDates().filter(ds=>openOn(id,ds)).length : 0; return c; }
-  // Farbe nach Art des Orts
-  const KINDS = [
-    ['bib',   'Bibliothek',            /bibliothek/i,                         'var(--sky)'],
-    ['fz',    'Familien- & Stadtteilzentrum', /familienzentrum|stadtteilzentrum|kreativhaus/i, 'var(--peach)'],
-    ['cafe',  'Café & Spielort',       /caf[eé]|spielort|ludothek/i,           'var(--mint)'],
-    ['kurs',  'Kurse & Sport',         /kurs|turnhalle|verein|praxis/i,        'var(--rosa)'],
-    ['other', 'Weitere Orte',          /./,                                    'var(--vanille)'],
-  ];
-  const kindOf = id => { const p = P[id]||{}; const t = (p.type||'')+' '+(p.name||''); return KINDS.find(k => k[2].test(t)) || KINDS[KINDS.length-1]; };
 
-  let map = null, layer = null, markers = {}, fittedKey = '';
-  function initMap(){
-    if (map || !window.L) return;
-    map = L.map('map', { zoomControl:false, scrollWheelZoom:true, attributionControl:true }).setView([52.532, 13.425], 13);
-    L.control.zoom({ position:'bottomright' }).addTo(map);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
-    layer = L.layerGroup().addTo(map);
-  }
   function renderMap(){
+    const svg = document.getElementById('map'); svg.replaceChildren();
+    svg.append(s('rect',{x:0,y:0,width:BOX.w,height:BOX.h,class:'map-land',rx:16}));
+    svg.append(s('path',{class:'map-park',d:line([[52.5455,13.4015],[52.5455,13.4060],[52.5390,13.4060],[52.5390,13.4030]])+' Z'}));
+    svg.append(s('path',{class:'map-park',d:line([[52.5300,13.4255],[52.5292,13.4420],[52.5255,13.4420],[52.5258,13.4265]])+' Z'}));
+    svg.append(s('path',{class:'map-water',d:line([[52.5205,13.3980],[52.5170,13.4035],[52.5128,13.4100],[52.5098,13.4190],[52.5072,13.4290],[52.5050,13.4400]])}));
+    [
+      [[52.5291,13.4105],[52.5520,13.4135]],                // Schönhauser Allee
+      [[52.5247,13.4155],[52.5520,13.4270]],                // Prenzlauer Allee
+      [[52.5262,13.4248],[52.5450,13.4430]],                // Greifswalder Str.
+      [[52.5262,13.4248],[52.5400,13.4390],[52.5470,13.4500],[52.5510,13.4570]], // Greifswalder Str. / Berliner Allee (M4)
+      [[52.5410,13.4000],[52.5398,13.4250],[52.5390,13.4460]], // Eberswalder / Danziger Str.
+      [[52.5292,13.3990],[52.5272,13.4150],[52.5252,13.4300],[52.5235,13.4460]], // Torstr. / Mollstr.
+      [[52.5220,13.4132],[52.5175,13.4460]],                // Karl-Marx-Allee
+      [[52.5219,13.4132],[52.5150,13.4110],[52.5110,13.4080]] // Grunerstr. Richtung Fischerinsel
+    ].forEach(p => svg.append(s('path',{class:'map-street',d:line(p)})));
+    [['Schönhauser Allee',52.5350,13.4090,-86],['Prenzlauer Allee',52.5370,13.4185,-70],['Greifswalder Str.',52.5330,13.4300,-48],
+     ['Danziger Str.',52.5408,13.4180,-1],['Karl-Marx-Allee',52.5208,13.4220,-8],['Alexanderplatz',52.5232,13.4040,0],
+     ['Spree',52.5108,13.4140,-28],['Mauerpark',52.5462,13.4000,0],['Volkspark',52.5276,13.4300,0],['Weißensee',52.5520,13.4480,0]]
+      .forEach(([t,la,ln,rot])=>{ const x=X(ln),y=Y(la); svg.append(s('text',{class:'map-label',x,y,transform:`rotate(${rot} ${x} ${y})`},t)); });
+
     const counts = countByPlace();
-    // Auf die Karte: Orte mit Terminen in der Auswahl und Orte, die diese Woche einfach offen sind
-    const openThisWeek = id => openCatOk() && ageMatch(P[id]) && weekDates().some(ds => openOn(id, ds));
-    const ids = Object.keys(P).filter(id => P[id].lat && P[id].lng && kiezMatchPlace(id) && (counts[id] > 0 || (openIds().includes(id) && openThisWeek(id))));
-    // Legende
+    const inBox = p => p.lat > BOX.lat0 && p.lat < BOX.lat1 && p.lng > BOX.lng0 && p.lng < BOX.lng1;
+    // Hand-entered places always show; places found by the calendar import only when they have something this week
+    const ids = Object.keys(P).filter(id => P[id].lat && P[id].lng && inBox(P[id]) && kiezMatchPlace(id) && (!P[id].auto || counts[id]))
+      .sort((a,b) => (counts[b]||0) - (counts[a]||0));
+    ids.forEach((id,i)=>{
+      const p = P[id], x=X(p.lng), y=Y(p.lat), r = id===state.place? 17:14, isOpen = pureOpen(id);
+      const g = s('g',{class:'pin',tabindex:0,role:'button','aria-label':p.name+', '+(counts[id]||0)+(isOpen?' offene Tage':' Termine')});
+      if (isOpen) g.append(s('rect',{class:'dot',x:x-r,y:y-r,width:2*r,height:2*r,rx:7,fill:'var(--mint)'}));
+      else g.append(s('circle',{class:'dot',cx:x,cy:y,r,fill:pinColors[i%pinColors.length]}));
+      g.append(s('text',{x,y:y+4,'text-anchor':'middle'}, String(counts[id]||0)));
+      const pick = ()=>pickPlace(id);
+      g.addEventListener('click',pick); g.addEventListener('keydown',ev=>{ if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();pick();} });
+      svg.append(g);
+    });
     const lg = document.getElementById('legend'); lg.replaceChildren();
-    const used = new Set(ids.map(id => kindOf(id)[0]));
-    KINDS.filter(k => used.has(k[0])).forEach(k => lg.append(el('span',{class:'lg'}, el('i',{style:'background:'+k[3]}), k[1])));
-    document.getElementById('mapcount').textContent = ids.length ? ids.length + (ids.length===1 ? ' Ort' : ' Orte') : 'Keine Orte für diese Auswahl';
-    if (!map) return;
-    layer.clearLayers(); markers = {};
-    for (const id of ids){
-      const p = P[id], k = kindOf(id), sel = id===state.place;
-      const icon = L.divIcon({ className:'', iconSize:[34,34], iconAnchor:[17,17],
-        html:'<span class="mk'+(pureOpen(id)?' sq':'')+(sel?' sel':'')+'" style="background:'+k[3]+'">'+(counts[id] || '')+'</span>' });
-      const m = L.marker([p.lat, p.lng], { icon, title:p.name, keyboard:true, riseOnHover:true }).addTo(layer);
-      m.bindTooltip(p.name, { direction:'top', offset:[0,-16] });
-      m.on('click', () => pickPlace(id, true));
-      markers[id] = m;
-    }
-    // Ausschnitt anpassen, wenn sich Kiez oder Woche ändern (nicht bei jedem Klick)
-    const key = state.kiez+'|'+state.week+'|'+ids.length;
-    if (!state.place && key !== fittedKey && ids.length){
-      fittedKey = key;
-      map.fitBounds(L.latLngBounds(ids.map(id => [P[id].lat, P[id].lng])), { padding:[40,40], maxZoom:15 });
-    }
+    ids.forEach((id,i)=>{
+      const p = P[id], isOpen = pureOpen(id), hrs = WD_ORDER.filter(w=>(p.hours||{})[String(w)]).map(w=>WD[w]).join(', ');
+      lg.append(el('button',{type:'button',onclick:()=>pickPlace(id)},
+        el('span',{class:'n'+(isOpen?' sq':''),style:'background:'+(isOpen?'var(--mint)':pinColors[i%pinColors.length])}, String(counts[id]||0)),
+        el('span',null, el('span',{class:'lname'},p.name), el('span',{class:'laddr'}, (hrs? 'Offen '+hrs+' · ' : '')+p.address)),
+        el('span',{class:'lcount'},'zeigen →')));
+    });
   }
-  function hot(id, on){ const m = markers[id]; if (!m) return; const elx = m.getElement(); if (elx){ elx.classList.toggle('hot', on); if (on) m.setZIndexOffset(1000); else m.setZIndexOffset(0); } }
-  document.addEventListener('mouseover', ev => { const c = ev.target.closest && ev.target.closest('[data-place]'); if (c) hot(c.dataset.place, true); });
-  document.addEventListener('mouseout',  ev => { const c = ev.target.closest && ev.target.closest('[data-place]'); if (c) hot(c.dataset.place, false); });
 
-  // ---------- Ansicht (nur Handy: Liste oder Karte) ----------
-  const topbarH = () => document.getElementById('topbar').getBoundingClientRect().height;
-  function syncTopbar(){ document.documentElement.style.setProperty('--topbar-h', Math.round(topbarH())+'px'); if (map) map.invalidateSize(); }
-  function setView(v){ state.view = v; document.body.classList.toggle('show-map', v==='map');
-    const b = document.getElementById('viewtoggle'); b.textContent = v==='map' ? 'Liste zeigen' : 'Karte zeigen';
-    if (v==='map' && map) setTimeout(() => map.invalidateSize(), 50); }
-
-  // ---------- Filter-Knöpfe mit Auswahlfeld ----------
-  const AGE_L = { all:'Alle Alter', baby:'Baby 0–1', klein:'Kleinkind 1–3', kita:'Kita 3–6' };
-  const KIEZ_L = { all:'Alle Kieze', pb:'Prenzlauer Berg', mitte:'Mitte', fhain:'Friedrichshain', weissensee:'Weißensee' };
-  const CAT_L = { all:'Alle Bereiche', treff:'Offene Treffs', bewegung:'Bewegung', musik:'Musik', lesen:'Bücher, Sprache & Theater', kreativ:'Basteln', besonders:'Feste & Besonderes' };
   function render(){
     document.getElementById('wk-this').setAttribute('aria-pressed', state.week==='this');
     document.getElementById('wk-next').setAttribute('aria-pressed', state.week==='next');
-    document.querySelectorAll('.opt[data-age]').forEach(c=>c.setAttribute('aria-pressed', c.dataset.age===state.age));
-    document.querySelectorAll('.opt[data-cat]').forEach(c=>c.setAttribute('aria-pressed', c.dataset.cat===state.cat));
-    document.querySelectorAll('.opt[data-kiez]').forEach(c=>c.setAttribute('aria-pressed', c.dataset.kiez===state.kiez));
-    document.getElementById('f-age-v').textContent = AGE_L[state.age];
-    document.getElementById('f-kiez-v').textContent = KIEZ_L[state.kiez];
-    document.getElementById('f-cat-v').textContent = CAT_L[state.cat];
-    document.getElementById('f-age').classList.toggle('on', state.age!=='all');
-    document.getElementById('f-kiez').classList.toggle('on', state.kiez!=='all');
-    document.getElementById('f-cat').classList.toggle('on', state.cat!=='all');
+    document.querySelectorAll('.chip[data-age]').forEach(c=>c.setAttribute('aria-pressed', c.dataset.age===state.age));
+    document.querySelectorAll('.chip[data-cat]').forEach(c=>c.setAttribute('aria-pressed', c.dataset.cat===state.cat));
+    document.querySelectorAll('.chip[data-kiez]').forEach(c=>c.setAttribute('aria-pressed', c.dataset.kiez===state.kiez));
     document.getElementById('free').setAttribute('aria-pressed', state.free);
+    document.getElementById('tab-list').setAttribute('aria-selected', state.view==='list');
+    document.getElementById('tab-map').setAttribute('aria-selected', state.view==='map');
+    document.getElementById('view-list').hidden = state.view!=='list';
+    document.getElementById('view-map').hidden = state.view!=='map';
     const fn = document.getElementById('filternote');
-    fn.hidden = !state.place;
+    fn.hidden = !state.place || state.view!=='list';
     if (state.place) document.getElementById('filternote-text').textContent = 'Nur: '+placeName(state.place);
     renderHighlights(); renderOpen(); renderList(); renderMap();
   }
-  function closePills(except){ document.querySelectorAll('details.fpill[open]').forEach(d => { if (d!==except) d.open = false; }); }
-  // The panel is position:fixed so the scrolling filter row cannot clip it; place it under its button
-  function placePanel(d){ const r = d.querySelector('summary').getBoundingClientRect(), pnl = d.querySelector('.panel');
-    pnl.style.top = r.bottom+'px'; pnl.style.left = Math.max(8, Math.min(r.left, innerWidth - pnl.offsetWidth - 8))+'px'; }
-  document.querySelectorAll('details.fpill').forEach(d => d.addEventListener('toggle', () => { if (d.open){ closePills(d); placePanel(d); } }));
-  const replace = () => document.querySelectorAll('details.fpill[open]').forEach(placePanel);
-  document.querySelector('.filters').addEventListener('scroll', replace, {passive:true});
-  window.addEventListener('scroll', replace, {passive:true});
-  document.addEventListener('click', ev => { if (!ev.target.closest('details.fpill')) closePills(); });
-  document.addEventListener('keydown', ev => { if (ev.key==='Escape') closePills(); });
-  const choose = fn => ev => { fn(ev.currentTarget); remember(); closePills(); render(); };
-  document.querySelectorAll('.opt[data-age]').forEach(c=>c.addEventListener('click', choose(c => state.age = c.dataset.age)));
-  document.querySelectorAll('.opt[data-kiez]').forEach(c=>c.addEventListener('click', choose(c => { state.kiez = c.dataset.kiez; fittedKey=''; })));
-  document.querySelectorAll('.opt[data-cat]').forEach(c=>c.addEventListener('click', choose(c => state.cat = c.dataset.cat)));
+
+  document.getElementById('wk-this').addEventListener('click',()=>{state.week='this';render();});
+  document.getElementById('wk-next').addEventListener('click',()=>{state.week='next';render();});
+  document.querySelectorAll('.chip[data-age]').forEach(c=>c.addEventListener('click',()=>{ state.age=c.dataset.age; remember(); render(); }));
+  document.querySelectorAll('.chip[data-kiez]').forEach(c=>c.addEventListener('click',()=>{ state.kiez=c.dataset.kiez; remember(); render(); }));
+  document.querySelectorAll('.chip[data-cat]').forEach(c=>c.addEventListener('click',()=>{ state.cat=c.dataset.cat; remember(); render(); }));
   document.getElementById('free').addEventListener('click',()=>{ state.free=!state.free; remember(); render(); });
-  document.getElementById('wk-this').addEventListener('click',()=>{ state.week='this'; render(); });
-  document.getElementById('wk-next').addEventListener('click',()=>{ state.week='next'; render(); });
-  document.getElementById('clearplace').addEventListener('click',()=>{ state.place=null; fittedKey=''; render(); });
-  document.getElementById('viewtoggle').addEventListener('click',()=> setView(state.view==='map' ? 'list' : 'map'));
-  window.addEventListener('resize', syncTopbar);
-  if (window.ResizeObserver) new ResizeObserver(syncTopbar).observe(document.getElementById('topbar'));
+  document.getElementById('tab-list').addEventListener('click',()=>{state.view='list';render();});
+  document.getElementById('tab-map').addEventListener('click',()=>{state.view='map';render();});
+  document.getElementById('clearplace').addEventListener('click',()=>{state.place=null;render();});
 
   Promise.all([loadJSON('manual.json'), loadJSON('events.json').catch(()=>({events:[]}))]).then(([manual, auto])=>{
-    // Orte aus dem Abruf (z. B. berlinmitkind.de) kommen aus events.json; eigene Einträge haben Vorrang
+    // Venues found by the import (e.g. via berlinmitkind.de) come from events.json; hand-entered places win on conflicts
     P = Object.assign({}, auto.places || {}, manual.places || {});
     META = { updated: auto.updated, until: auto.until };
     const from = fmt(monday), to = fmt(addDays(monday,13));
-    // Eigene Einträge haben Vorrang: ein importierter Termin mit gleichem Tag, Beginn und Titel fällt weg
+    // Hand-entered entries win: an imported event with the same day, start time and title is dropped
     const mine = [].concat(manual.events||[], expandPlans(manual.plans||[], from, to));
     const key = e => e.date+'|'+(e.start||'')+'|'+(e.title||'').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g,'').slice(0,14);
     const taken = new Set(mine.map(key));
@@ -660,7 +610,7 @@ footer strong{color:var(--ink)}
     if (sUrl && /^https:\/\/(forms\.gle|docs\.google\.com)\//.test(sUrl)){ const a = document.getElementById('suggest'); a.href = sUrl; a.hidden = false; }
     document.getElementById('loading').hidden = true;
     document.getElementById('app').hidden = false;
-    syncTopbar(); initMap(); render();
+    render();
   }).catch(err=>{
     document.getElementById('loading').textContent = 'Die Termine konnten nicht geladen werden. Bitte die Seite neu laden. ('+err.message+')';
   });

@@ -13,21 +13,21 @@
 <style>
 /* Layout: split screen like a search page. Sticky top bar with logo, week switch and filter pills;
    left column scrolls the list (highlights, open places, week), right column holds a sticky map.
-   Style guide "Playces": white ground, brand colours only as fills with black text, small radii,
+   Style guide "Playces" (styleguide.html): white ground, pastel brand colours only as fills with dark text, small radii,
    shadows only where something floats, short press feedback on everything clickable. WCAG AA checked. */
 :root{
-  /* Brand palette */
-  --rot:#EA3C37; --gelb:#F0D748; --hellblau:#94C4F3; --blau:#4A95F1; --koralle:#ED795B;
-  --graublau:#A9BFDD; --rosa:#F8D4E5; --gruen:#5AAA9C;
-  /* Text-safe variants (>= 4.5:1 on white) */
-  --rot-text:#E51E18; --blau-text:#1270E4; --gruen-text:#417E73; --koralle-text:#D53E17;
-  /* Neutrals */
-  --paper:#FFFFFF; --paper-soft:#F7F5F3; --line:#E6E2DE; --ink:#0D0202; --muted:#746E67;
-  /* Aliases used by the script (place kinds, age tags) */
-  --bg:var(--paper); --surface:var(--paper); --sunken:var(--paper-soft); --accent:var(--blau-text); --chip-ink:var(--ink);
-  --sky:var(--hellblau); --peach:var(--koralle); --mint:var(--gruen); --lilac:var(--graublau);
-  --sun:var(--gelb); --pink:var(--rosa); --teal:var(--graublau); --orange:var(--rot);
-  --map-land:#EEF0F2;
+  /* Markenfarben (Styleguide Playces) */
+  --pfirsich:#FFB592; --vanille:#FFEFCA; --himmel:#C3E1FF; --creme:#FAF7F1;
+  --rosa:#F8D4E5; --salbei:#B2CEAF;
+  /* Textfarben, aus den Markenfarben abgedunkelt (>= 4.5:1 auf Weiß und Creme) */
+  --pfirsich-text:#B4501E; --himmel-text:#2D69A6; --rosa-text:#AE3A6F; --salbei-text:#4D774A; --vanille-text:#8A6A12;
+  /* Neutrale */
+  --paper:#FFFFFF; --paper-soft:var(--creme); --line:#ECE6DC; --ink:#1F1A17; --muted:#6F6862;
+  /* Kurznamen fürs Skript (Arten von Orten, Altersschilder) */
+  --bg:var(--paper); --surface:var(--paper); --sunken:var(--paper-soft); --accent:var(--himmel-text); --chip-ink:var(--ink);
+  --sky:var(--himmel); --peach:var(--pfirsich); --mint:var(--salbei); --lilac:var(--rosa);
+  --sun:var(--vanille); --pink:var(--rosa); --teal:var(--salbei); --orange:var(--pfirsich);
+  --map-land:#F1F1EF;
   /* Shape and motion */
   --r-sm:4px; --r-md:8px; --r:8px;
   --shadow-float:0 1px 2px rgba(13,2,2,.06),0 4px 12px rgba(13,2,2,.08);
@@ -41,9 +41,9 @@
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
 [hidden]{display:none!important}
-a{color:var(--blau-text)}
+a{color:var(--himmel-text)}
 button{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--blau-text);outline-offset:2px}
+:focus-visible{outline:2px solid var(--himmel-text);outline-offset:2px}
 
 /* Micro-interactions: hover darkens slightly, press sinks 1px */
 button,summary,.suggest,.hl,a.tag{transition:background-color var(--t) var(--ease),color var(--t) var(--ease),border-color var(--t) var(--ease),transform var(--t) var(--ease),box-shadow var(--t) var(--ease)}
@@ -55,10 +55,11 @@ button:active,summary:active,.suggest:active,a.hl:active{transform:translateY(1p
   display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;border-bottom:1px solid var(--line)}
 .logo{font-family:var(--f-display);font-weight:800;font-size:34px;line-height:1;margin:0 8px 0 0;display:flex;letter-spacing:.01em}
 .logo span{display:inline-block}
-.logo span:nth-child(1),.logo span:nth-child(5){color:var(--rot-text)}
-.logo span:nth-child(2),.logo span:nth-child(6){color:var(--blau-text)}
-.logo span:nth-child(3),.logo span:nth-child(7){color:var(--koralle-text)}
-.logo span:nth-child(4){color:var(--gruen-text)}
+.logo span:nth-child(1),.logo span:nth-child(6){color:var(--pfirsich-text)}
+.logo span:nth-child(2),.logo span:nth-child(7){color:var(--himmel-text)}
+.logo span:nth-child(3){color:var(--vanille-text)}
+.logo span:nth-child(4){color:var(--rosa-text)}
+.logo span:nth-child(5){color:var(--salbei-text)}
 .logo span:nth-child(3n){transform:rotate(-3deg)}
 .filters{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;flex:1 1 auto;min-width:0;padding:3px}
 .filters::-webkit-scrollbar{display:none}
@@ -84,7 +85,7 @@ button:active,summary:active,.suggest:active,a.hl:active{transform:translateY(1p
 .opt[aria-pressed="true"]::before{background:var(--dot,var(--ink));box-shadow:inset 0 0 0 1.5px var(--ink)}
 .fchip{flex:none;border:1px solid var(--line);background:var(--paper);border-radius:var(--r-md);padding:7px 12px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
 .fchip:hover{border-color:var(--muted)}
-.fchip[aria-pressed="true"]{background:var(--gruen);border-color:var(--gruen);color:var(--ink)}
+.fchip[aria-pressed="true"]{background:var(--salbei);border-color:var(--salbei);color:var(--ink)}
 
 /* Split layout */
 .layout{display:block}
@@ -138,8 +139,8 @@ h2{font-family:var(--f-display);font-weight:700;font-size:26px;line-height:1.1;m
 /* Highlights */
 .hl-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,78%);gap:12px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x mandatory;scrollbar-width:thin}
 @media (min-width:640px){.hl-row{grid-auto-columns:calc(50% - 6px)}}
-.hl{scroll-snap-align:start;background:var(--gelb);color:var(--ink);border-radius:var(--r-md);padding:18px;display:flex;flex-direction:column;gap:6px;min-width:0;text-decoration:none}
-.hl:nth-child(4n+2){background:var(--koralle)} .hl:nth-child(4n+3){background:var(--hellblau)} .hl:nth-child(4n+4){background:var(--rosa)}
+.hl{scroll-snap-align:start;background:var(--pfirsich);color:var(--ink);border-radius:var(--r-md);padding:18px;display:flex;flex-direction:column;gap:6px;min-width:0;text-decoration:none}
+.hl:nth-child(4n+2){background:var(--himmel)} .hl:nth-child(4n+3){background:var(--rosa)} .hl:nth-child(4n+4){background:var(--salbei)}
 a.hl:hover{box-shadow:inset 0 0 0 2px var(--ink)}
 .hl .when{font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 .hl h3{font-family:var(--f-display);font-weight:700;font-size:22px;line-height:1.1;margin:0;text-wrap:balance}
@@ -161,13 +162,13 @@ details.op[open] .op-top::after{transform:rotate(-135deg);margin:4px 4px 0 0}
 .op h3{font-family:var(--f-display);font-weight:700;font-size:20px;margin:0;line-height:1.15}
 .op .addr{font-size:14px;color:var(--muted)}
 .status{font-weight:700;font-size:13.5px;border-radius:var(--r-sm);padding:4px 10px;white-space:nowrap}
-.status.on{background:var(--gruen);color:var(--ink)}
+.status.on{background:var(--salbei);color:var(--ink)}
 .status.off{background:var(--paper-soft);color:var(--muted)}
 .hours{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .hd{border-radius:var(--r-sm);padding:6px 2px;text-align:center;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line);font-size:12px;font-variant-numeric:tabular-nums;line-height:1.25;color:var(--muted);white-space:pre-line}
 .hd b{display:block;font-size:13px;color:var(--ink)}
 .hd.has{background:var(--paper-soft);box-shadow:none;color:var(--ink)}
-.hd.now{background:var(--hellblau);box-shadow:none;color:var(--ink)} .hd.now b{color:var(--ink)}
+.hd.now{background:var(--himmel);box-shadow:none;color:var(--ink)} .hd.now b{color:var(--ink)}
 .openline{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-size:14px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 14px}
 .openline .lab{font-weight:700}
 
@@ -176,7 +177,7 @@ details.op[open] .op-top::after{transform:rotate(-135deg);margin:4px 4px 0 0}
 .dayhead{position:sticky;top:var(--topbar-h,0px);z-index:2;background:var(--paper);padding:10px 0 4px;display:flex;align-items:baseline;gap:10px}
 .dayhead .dname{font-family:var(--f-display);font-weight:700;font-size:22px}
 .dayhead .ddate{color:var(--muted);font-variant-numeric:tabular-nums}
-.dayhead .today{background:var(--rot);color:var(--ink);font-size:11.5px;font-weight:700;border-radius:var(--r-sm);padding:2px 8px;text-transform:uppercase;letter-spacing:.06em}
+.dayhead .today{background:var(--pfirsich);color:var(--ink);font-size:11.5px;font-weight:700;border-radius:var(--r-sm);padding:2px 8px;text-transform:uppercase;letter-spacing:.06em}
 .ev{display:grid;grid-template-columns:58px 1fr;gap:12px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;transition:border-color var(--t) var(--ease)}
 .ev:hover{border-color:var(--muted)}
 .ev .time{font-weight:700;font-variant-numeric:tabular-nums;font-size:15px;line-height:1.25}
@@ -187,21 +188,21 @@ details.op[open] .op-top::after{transform:rotate(-135deg);margin:4px 4px 0 0}
 .ev .place{font-size:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .ev .place .venue{color:var(--muted)}
 .ev .src{font-size:13px}
-.ev.star{box-shadow:inset 4px 0 0 var(--gelb)}
-.linkbtn{border:0;background:none;padding:0;color:var(--blau-text);font-weight:600;cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.ev.star{box-shadow:inset 4px 0 0 var(--pfirsich)}
+.linkbtn{border:0;background:none;padding:0;color:var(--himmel-text);font-weight:600;cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 .linkbtn:hover{text-decoration-thickness:2px}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
 .tag{font-size:12.5px;font-weight:700;border-radius:var(--r-sm);padding:2px 8px;color:var(--ink);background:var(--paper-soft)}
-.tag.age-baby{background:var(--gruen)} .tag.age-klein{background:var(--gelb)} .tag.age-kita{background:var(--rosa)} .tag.age-gross{background:var(--hellblau)} .tag.age-all{background:var(--paper-soft);color:var(--ink)}
+.tag.age-baby{background:var(--salbei)} .tag.age-klein{background:var(--vanille)} .tag.age-kita{background:var(--rosa)} .tag.age-gross{background:var(--himmel)} .tag.age-all{background:var(--paper-soft);color:var(--ink)}
 .tag.plain{background:transparent;box-shadow:inset 0 0 0 1px var(--line);color:var(--muted)}
-.tag.warn{background:transparent;box-shadow:inset 0 0 0 1px var(--rot);color:var(--rot-text)}
-.filternote{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--hellblau);color:var(--ink);border-radius:var(--r-md);padding:10px 14px;font-size:14px}
+.tag.warn{background:transparent;box-shadow:inset 0 0 0 1px var(--pfirsich);color:var(--pfirsich-text)}
+.filternote{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--himmel);color:var(--ink);border-radius:var(--r-md);padding:10px 14px;font-size:14px}
 .filternote button{border:0;background:var(--paper);color:var(--ink);border-radius:var(--r-sm);padding:4px 10px;font-weight:700;cursor:pointer}
 
 /* Suggest + footer */
-.suggest{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--graublau);border-radius:var(--r-md);padding:18px;color:var(--ink);text-decoration:none;font-size:15px}
+.suggest{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--vanille);border-radius:var(--r-md);padding:18px;color:var(--ink);text-decoration:none;font-size:15px}
 .suggest-btn{background:var(--ink);color:var(--paper);border-radius:var(--r-sm);padding:9px 14px;font-weight:700;white-space:nowrap;transition:background-color var(--t) var(--ease)}
-.suggest:hover .suggest-btn{background:var(--blau-text)}
+.suggest:hover .suggest-btn{background:var(--himmel-text)}
 footer{border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:14px;display:flex;flex-direction:column;gap:8px}
 footer p{margin:0}
 footer strong{color:var(--ink)}
@@ -220,9 +221,9 @@ footer strong{color:var(--ink)}
     <details class="fpill" id="f-age"><summary><span id="f-age-v">Alle Alter</span></summary>
       <div class="panel" role="group" aria-label="Alter">
         <button class="opt" type="button" data-age="all">Alle Alter</button>
-        <button class="opt" type="button" data-age="baby" style="--dot:var(--mint)">Baby 0–1</button>
-        <button class="opt" type="button" data-age="klein" style="--dot:var(--sun)">Kleinkind 1–3</button>
-        <button class="opt" type="button" data-age="kita" style="--dot:var(--pink)">Kita 3–6</button>
+        <button class="opt" type="button" data-age="baby" style="--dot:var(--salbei)">Baby 0–1</button>
+        <button class="opt" type="button" data-age="klein" style="--dot:var(--vanille)">Kleinkind 1–3</button>
+        <button class="opt" type="button" data-age="kita" style="--dot:var(--rosa)">Kita 3–6</button>
       </div></details>
     <details class="fpill" id="f-kiez"><summary><span id="f-kiez-v">Alle Kieze</span></summary>
       <div class="panel" role="group" aria-label="Kiez">
@@ -541,8 +542,8 @@ footer strong{color:var(--ink)}
     ['bib',   'Bibliothek',            /bibliothek/i,                         'var(--sky)'],
     ['fz',    'Familien- & Stadtteilzentrum', /familienzentrum|stadtteilzentrum|kreativhaus/i, 'var(--peach)'],
     ['cafe',  'Café & Spielort',       /caf[eé]|spielort|ludothek/i,           'var(--mint)'],
-    ['kurs',  'Kurse & Sport',         /kurs|turnhalle|verein|praxis/i,        'var(--lilac)'],
-    ['other', 'Weitere Orte',          /./,                                    'var(--sun)'],
+    ['kurs',  'Kurse & Sport',         /kurs|turnhalle|verein|praxis/i,        'var(--rosa)'],
+    ['other', 'Weitere Orte',          /./,                                    'var(--vanille)'],
   ];
   const kindOf = id => { const p = P[id]||{}; const t = (p.type||'')+' '+(p.name||''); return KINDS.find(k => k[2].test(t)) || KINDS[KINDS.length-1]; };
 

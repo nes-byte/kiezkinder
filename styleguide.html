@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light">
+<title>Playces Styleguide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --pfirsich:#FFB592; --vanille:#FFEFCA; --himmel:#C3E1FF; --creme:#FAF7F1; --rosa:#F8D4E5; --salbei:#B2CEAF;
+  --pfirsich-text:#B4501E; --vanille-text:#8A6A12; --himmel-text:#2D69A6; --rosa-text:#AE3A6F; --salbei-text:#4D774A;
+  --paper:#FFFFFF; --line:#ECE6DC; --ink:#1F1A17; --muted:#6F6862;
+  --r-sm:4px; --r-md:8px;
+  --f-display:"Baloo 2","Trebuchet MS",sans-serif; --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+.wrap{max-width:960px;margin:0 auto;padding:32px 16px 64px;display:flex;flex-direction:column;gap:48px}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;margin:0;line-height:1.1}
+h1{font-size:clamp(36px,6vw,52px)}
+h2{font-size:28px;margin-bottom:6px}
+p{margin:0}
+.muted{color:var(--muted)}
+a{color:var(--himmel-text)}
+section{display:flex;flex-direction:column;gap:16px}
+.logo{font-family:var(--f-display);font-weight:800;font-size:56px;line-height:1;display:flex}
+.logo span:nth-child(1),.logo span:nth-child(6){color:var(--pfirsich-text)}
+.logo span:nth-child(2),.logo span:nth-child(7){color:var(--himmel-text)}
+.logo span:nth-child(3){color:var(--vanille-text)}
+.logo span:nth-child(4){color:var(--rosa-text)}
+.logo span:nth-child(5){color:var(--salbei-text)}
+.logo span:nth-child(3n){transform:rotate(-3deg)}
+
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.sw{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;display:flex;flex-direction:column}
+.sw .chip{height:110px;padding:12px;display:flex;align-items:flex-end;font-weight:700}
+.sw .meta{padding:12px;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.sw .name{font-weight:700;font-size:16px}
+.sw code{font-size:13px;color:var(--muted)}
+.sw .use{color:var(--muted)}
+.sw .txt{display:flex;align-items:center;gap:6px;font-size:13px}
+.sw .txt i{width:14px;height:14px;border-radius:3px;display:inline-block}
+
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:700}
+td code{font-size:13px}
+.tablewrap{overflow-x:auto}
+
+.typo{display:flex;flex-direction:column;gap:14px;border:1px solid var(--line);border-radius:var(--r-md);padding:20px}
+.typo .row{display:grid;grid-template-columns:140px 1fr;gap:12px;align-items:baseline}
+@media (max-width:560px){.typo .row{grid-template-columns:1fr}}
+
+.demo{display:flex;flex-wrap:wrap;gap:12px;align-items:center;border:1px solid var(--line);border-radius:var(--r-md);padding:20px}
+.btn{border:0;border-radius:var(--r-sm);padding:9px 14px;font:700 15px var(--f-body);cursor:pointer;background:var(--ink);color:var(--paper)}
+.btn.sec{background:var(--paper);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.pill{border:1px solid var(--line);background:var(--paper);border-radius:var(--r-md);padding:7px 12px;font-weight:600;font-size:14px}
+.pill.on{background:var(--salbei);border-color:var(--salbei)}
+.tag{font-size:12.5px;font-weight:700;border-radius:var(--r-sm);padding:2px 8px}
+.tag.plain{box-shadow:inset 0 0 0 1px var(--line);color:var(--muted)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;display:grid;grid-template-columns:58px 1fr;gap:12px;max-width:440px}
+.card b{font-size:15px}
+.card h3{font-family:var(--f-body);font-size:17px}
+.hl{border-radius:var(--r-md);padding:18px;width:230px;display:flex;flex-direction:column;gap:6px}
+.hl small{font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.hl h3{font-size:22px}
+.mk{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;font:800 13px var(--f-body);box-shadow:0 0 0 2px var(--paper),0 1px 3px rgba(0,0,0,.25)}
+.mk.sq{border-radius:var(--r-sm)}
+ul.rules{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:12px">
+    <div class="logo" aria-label="Playces"><span>P</span><span>l</span><span>a</span><span>y</span><span>c</span><span>e</span><span>s</span></div>
+    <h1>Styleguide</h1>
+    <p class="muted">Farben, Schrift und Bausteine für die Seite und die Pflege-Seite. Weißer Grund, Pastell nur als Fläche, Text immer dunkel.</p>
+  </header>
+
+  <section>
+    <div><h2>Farben</h2><p class="muted">Sechs Markenfarben. Als Fläche mit dunklem Text (#1F1A17). Für Schrift auf Weiß gibt es zu jeder eine abgedunkelte Textfarbe.</p></div>
+    <div class="swatches" id="swatches"></div>
+  </section>
+
+  <section>
+    <div><h2>Wofür welche Farbe</h2></div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Farbe</th><th>Fläche für</th><th>Textfarbe für</th></tr></thead>
+      <tbody>
+        <tr><td>Pfirsich <code>#FFB592</code></td><td>Familien- &amp; Stadtteilzentren auf der Karte, „heute“, Highlight-Markierung</td><td>Logo, Warnhinweise <code>#B4501E</code></td></tr>
+        <tr><td>Vanille <code>#FFEFCA</code></td><td>Kleinkind 1–3, „Termin vorschlagen“, weitere Orte auf der Karte</td><td>Logo <code>#8A6A12</code></td></tr>
+        <tr><td>Himmel <code>#C3E1FF</code></td><td>Bibliotheken auf der Karte, heutiger Tag im Öffnungsraster, Filterhinweis</td><td>Links, Fokusrahmen <code>#2D69A6</code></td></tr>
+        <tr><td>Creme <code>#FAF7F1</code></td><td>Leicht abgesetzte Flächen: Öffnungstage, „Alle Alter“, geschlossen</td><td>keine</td></tr>
+        <tr><td>Rosa <code>#F8D4E5</code></td><td>Kita 3–6, Kurse &amp; Sport auf der Karte</td><td>Logo <code>#AE3A6F</code></td></tr>
+        <tr><td>Salbei <code>#B2CEAF</code></td><td>Baby 0–1, Cafés &amp; Spielorte, „Jetzt offen“, aktiver Filter</td><td>Logo <code>#4D774A</code></td></tr>
+      </tbody>
+    </table></div>
+    <p class="muted" style="font-size:14px">Neutrale Töne: Weiß <code>#FFFFFF</code> als Grund, Linien <code>#ECE6DC</code>, Text <code>#1F1A17</code>, Nebentext <code>#6F6862</code>.</p>
+  </section>
+
+  <section>
+    <div><h2>Schrift</h2><p class="muted">Baloo 2 für Überschriften und Logo, Figtree für alles andere. Beide kostenlos über Google Fonts.</p></div>
+    <div class="typo">
+      <div class="row"><span class="muted">Logo · Baloo 2 800</span><span style="font:800 34px var(--f-display)">Playces</span></div>
+      <div class="row"><span class="muted">Titel · Baloo 2 700</span><span style="font:700 40px/1.1 var(--f-display)">Wohin heute mit den Kleinen?</span></div>
+      <div class="row"><span class="muted">Abschnitt · Baloo 2 700</span><span style="font:700 26px/1.1 var(--f-display)">Alle Termine</span></div>
+      <div class="row"><span class="muted">Termin · Figtree 700</span><span style="font:700 17px var(--f-body)">Bilderbuchkino mit Bastelangebot</span></div>
+      <div class="row"><span class="muted">Text · Figtree 400</span><span>Pünktlicher Start, für Kinder ab 3 Jahren, ohne Anmeldung.</span></div>
+      <div class="row"><span class="muted">Klein · Figtree 700</span><span style="font:700 12.5px var(--f-body);letter-spacing:.06em;text-transform:uppercase">Donnerstag, 19. Nov. · 16:30</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div><h2>Bausteine</h2><p class="muted">Kleine Radien (4 und 8 px), dünne Linien statt Rahmen, Schatten nur bei Dingen, die schweben (Auswahlfelder, Kartenpunkte).</p></div>
+    <div class="demo">
+      <button class="btn" type="button">Termin vorschlagen</button>
+      <button class="btn sec" type="button">Alle Orte zeigen</button>
+      <span class="pill">Alle Kieze ▾</span>
+      <span class="pill on">Ohne Anmeldung</span>
+    </div>
+    <div class="demo">
+      <span class="tag" style="background:var(--salbei)">0–12 Monate</span>
+      <span class="tag" style="background:var(--vanille)">1–3 Jahre</span>
+      <span class="tag" style="background:var(--rosa)">ab 3 Jahren</span>
+      <span class="tag" style="background:var(--creme)">0–6 Jahre</span>
+      <span class="tag plain">kostenlos</span>
+      <span class="tag" style="background:var(--salbei)">Jetzt offen bis 18:00</span>
+      <span class="tag" style="background:var(--pfirsich)">HEUTE</span>
+    </div>
+    <div class="demo">
+      <article class="card"><b>16:30<br><small class="muted" style="font-weight:500">bis 17:30</small></b>
+        <div style="display:flex;flex-direction:column;gap:5px"><h3>Bilderbuchkino</h3><a href="#" onclick="return false">Das Haus Familienzentrum</a>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag" style="background:var(--rosa)">ab 3 Jahren</span><span class="tag plain">kostenlos</span></div></div></article>
+    </div>
+    <div class="demo">
+      <div class="hl" style="background:var(--pfirsich)"><small>Samstag · 10:30</small><h3>Bébé Symphonique</h3><span style="font-size:14px">Planetarium</span></div>
+      <div class="hl" style="background:var(--himmel)"><small>Samstag · 12:00</small><h3>Familienkonzert</h3><span style="font-size:14px">Philipp-Schaeffer-Bibliothek</span></div>
+    </div>
+    <div class="demo">
+      <span class="mk" style="background:var(--himmel)">4</span><span>Bibliothek</span>
+      <span class="mk" style="background:var(--pfirsich)">7</span><span>Familienzentrum</span>
+      <span class="mk sq" style="background:var(--salbei)"></span><span>Café &amp; Spielort</span>
+      <span class="mk" style="background:var(--rosa)">2</span><span>Kurse &amp; Sport</span>
+      <span class="mk" style="background:var(--vanille)">1</span><span>Weitere Orte</span>
+    </div>
+  </section>
+
+  <section>
+    <div><h2>Regeln</h2></div>
+    <ul class="rules">
+      <li>Grund bleibt weiß. Creme nur für leicht abgesetzte Flächen.</li>
+      <li>Pastell nie als Schriftfarbe, dafür die abgedunkelte Textfarbe nehmen.</li>
+      <li>Keine Illustrationen, Wellen oder Schnörkel hinter Inhalten.</li>
+      <li>Kein Dark Mode.</li>
+      <li>Alle Text-Kombinationen erreichen mindestens 4,5 : 1 Kontrast (WCAG AA).</li>
+    </ul>
+  </section>
+</div>
+<script>
+// Swatches with contrast numbers, computed so they always match the hex codes above
+const C = [
+  ['Pfirsich','#FFB592','#B4501E'],['Vanille','#FFEFCA','#8A6A12'],['Himmel','#C3E1FF','#2D69A6'],
+  ['Creme','#FAF7F1',null],['Rosa','#F8D4E5','#AE3A6F'],['Salbei','#B2CEAF','#4D774A']
+];
+const lum = h => { const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(x=>x<=.03928?x/12.92:((x+.055)/1.055)**2.4); return .2126*c[0]+.7152*c[1]+.0722*c[2]; };
+const cr = (a,b) => { const x=lum(a), y=lum(b); return ((Math.max(x,y)+.05)/(Math.min(x,y)+.05)).toFixed(1).replace('.',','); };
+const box = document.getElementById('swatches');
+for (const [n,f,t] of C){
+  box.insertAdjacentHTML('beforeend', `<div class="sw"><div class="chip" style="background:${f}">Aa · ${cr('#1F1A17',f)} : 1</div>
+    <div class="meta"><span class="name">${n}</span><code>${f}</code>
+    ${t ? `<span class="txt"><i style="background:${t}"></i><span style="color:${t};font-weight:700">Text ${t}</span><span class="muted">· ${cr(t,'#FFFFFF')} : 1 auf Weiß</span></span>` : '<span class="muted" style="font-size:13px">nur als Fläche</span>'}</div></div>`);
+}
+</script>
+</body>
+</html>

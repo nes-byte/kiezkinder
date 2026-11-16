@@ -7,26 +7,24 @@
 <title>Playces Pflege</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..800,100,1&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Figtree:wght@400;500;600;700;800&display=swap">
 <style>
 /* Layout: one working column; connect card, tabs, grouped lists, edit panel, sticky save bar */
 :root{
-  --bg:#F4EFFC; --surface:#FFFFFF; --ink:#2B1E3F; --muted:#6E6283; --line:#E2D8F2; --accent:#6B3FD4;
-  --sun:#FFD84D; --mint:#9BE7C4; --rose:#FFB3C7; --bad:#B3261E; --chip-ink:#2B1E3F;
-  --f-display:"Fraunces", Georgia, serif; --f-body:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Styleguide Playces: weißer Grund, Pastell nur als Fläche, dunkler Text */
+  --bg:#FAF7F1; --surface:#FFFFFF; --ink:#1F1A17; --muted:#6F6862; --line:#ECE6DC; --accent:#2D69A6;
+  --sun:#FFEFCA; --mint:#B2CEAF; --rose:#F8D4E5; --bad:#B3261E; --chip-ink:#1F1A17;
+  --f-display:"Baloo 2", "Trebuchet MS", sans-serif; --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root{
-  --bg:#1A1426; --surface:#251C35; --ink:#F1EAFB; --muted:#B4A8C8; --line:#3A2E50; --accent:#B59BFF;
-  --sun:#E8C23A; --mint:#6CCB9F; --rose:#E88AA4; --bad:#FF8A80; --chip-ink:#1A1426; color-scheme:dark}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-top:calc(20px + env(safe-area-inset-top,0px));padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
 [hidden]{display:none!important}
 .wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
-h1{font-family:var(--f-display);font-variation-settings:"SOFT" 100,"WONK" 1;font-size:clamp(30px,7vw,42px);margin:0;line-height:1.05}
-h2{font-family:var(--f-display);font-variation-settings:"SOFT" 100;font-size:22px;margin:0}
+h1{font-family:var(--f-display);font-size:clamp(30px,7vw,42px);margin:0;line-height:1.05}
+h2{font-family:var(--f-display);font-size:22px;margin:0}
 h3{margin:0;font-size:17px}
 a{color:var(--accent)}
 button,input,select,textarea{font:inherit;color:inherit}
